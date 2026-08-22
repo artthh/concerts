@@ -76,9 +76,17 @@ when you want the file to win outright.
 ## Regenerating the icons
 
 `public/icon.svg` and the PNGs are the 🎤 emoji on a dark gradient. An emoji
-needs a real font renderer, so `npm run icons` drives a headless Chrome and
-screenshots the glyph — no npm dependency, but it needs a Chrome or Chromium on
-the machine. Set `CHROME_PATH` if yours is somewhere unusual.
+needs a real font renderer, so `npm run icons` has a headless Chrome draw the
+glyph; the cropping and downscaling that follow are done with node's `zlib`, so
+the script still takes no npm dependency. It does need a Chrome or Chromium on
+the machine — set `CHROME_PATH` if yours is somewhere unusual.
+
+Three Chrome behaviours make that less direct than it sounds, and the script
+documents and asserts each one, because getting them wrong is what shipped a
+broken icon once: only the *viewport* area of a screenshot is painted and the
+viewport is shorter than the window, `--window-size` is silently clamped to a
+500px minimum width, and `--force-device-scale-factor` will not go below 0.5.
+So every icon is rendered at 512, cropped square, then box-filtered down.
 
 ## Project layout
 
