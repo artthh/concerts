@@ -5,9 +5,9 @@ const STRINGS = {
   es: {
     appName: 'Encore',
     tagline: 'Los conciertos que vienen y los que ya viviste',
-    navHome: 'Home',
-    navEvents: 'Events',
-    navHistory: 'History',
+    navHome: 'Inicio',
+    navEvents: 'Eventos',
+    navHistory: 'Historial',
     tabStats: 'Números',
     tabSettings: 'Ajustes',
 
