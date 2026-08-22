@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import Header from './components/Header.jsx'
-import TabBar from './components/TabBar.jsx'
-import UpcomingView from './components/UpcomingView.jsx'
+import TopNav from './components/TopNav.jsx'
+import HomeView from './components/HomeView.jsx'
+import EventsView from './components/EventsView.jsx'
 import HistoryView from './components/HistoryView.jsx'
-import StatsView from './components/StatsView.jsx'
 import SettingsView from './components/SettingsView.jsx'
 import ConcertForm from './components/ConcertForm.jsx'
 import ConcertDetail from './components/ConcertDetail.jsx'
+import Modal from './components/Modal.jsx'
 import { KEYS, load, save } from './lib/storage.js'
 import { getPhoto, removePhoto, storePhoto } from './lib/photos.js'
 import { isUpcoming, matchesQuery, normalizeConcert } from './lib/concerts.js'
@@ -22,20 +22,20 @@ const withoutPhotos = (list) =>
     return copy
   })
 
+// A history longer than this gets a search field; a short one does not need one.
+const SEARCHABLE_FROM = 8
+
 export default function App() {
   const [concerts, setConcerts] = useState(() =>
     withPhotos(load(KEYS.concerts, []).map((c) => normalizeConcert(c))),
   )
   const [lang, setLang] = useState(() => load(KEYS.lang, 'es'))
-  const [isDark, setIsDark] = useState(() => {
-    const stored = load(KEYS.theme, null)
-    if (stored) return stored === 'dark'
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-  })
-  const [tab, setTab] = useState('home')
+  const [isDark, setIsDark] = useState(() => load(KEYS.theme, 'dark') !== 'light')
+  const [section, setSection] = useState('events')
   const [query, setQuery] = useState('')
   const [editing, setEditing] = useState(null) // concert draft in the form sheet
   const [detail, setDetail] = useState(null) // concert id open in the detail sheet
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [toast, setToast] = useState('')
 
   const t = useMemo(() => translator(lang), [lang])
@@ -52,7 +52,7 @@ export default function App() {
   useEffect(() => {
     save(KEYS.theme, isDark ? 'dark' : 'light')
     document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
-    document.documentElement.style.backgroundColor = isDark ? '#0a0712' : '#f4f2f8'
+    document.documentElement.style.backgroundColor = isDark ? '#000000' : '#f4f2f8'
   }, [isDark])
 
   useEffect(() => {
@@ -61,14 +61,11 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [toast])
 
-  const visible = useMemo(
-    () => concerts.filter((c) => matchesQuery(c, query)),
-    [concerts, query],
-  )
   // The date alone decides which section a show belongs to, so a concert moves
-  // itself to the history tab the day after it happens.
-  const upcoming = visible.filter((c) => isUpcoming(c))
-  const past = visible.filter((c) => !isUpcoming(c))
+  // itself to the history section the day after it happens.
+  const upcoming = useMemo(() => concerts.filter((c) => isUpcoming(c)), [concerts])
+  const past = useMemo(() => concerts.filter((c) => !isUpcoming(c)), [concerts])
+  const pastMatching = useMemo(() => past.filter((c) => matchesQuery(c, query)), [past, query])
   const openConcert = detail ? concerts.find((c) => c.id === detail) : null
 
   async function saveConcert(concert) {
@@ -114,48 +111,33 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header
+      <TopNav
+        section={section}
+        onSection={setSection}
+        onAdd={() => setEditing({})}
+        onSettings={() => setSettingsOpen(true)}
         t={t}
-        lang={lang}
-        onToggleLang={() => setLang(lang === 'es' ? 'en' : 'es')}
-        isDark={isDark}
-        onToggleTheme={() => setIsDark((v) => !v)}
-        query={query}
-        onQuery={setQuery}
-        showSearch={tab === 'home' || tab === 'history'}
       />
 
       <main className="app__main">
-        {query && visible.length === 0 && <p className="empty">{t('noResults')}</p>}
-
-        {tab === 'home' && (
-          <UpcomingView concerts={upcoming} lang={lang} t={t} onOpen={(c) => setDetail(c.id)} />
+        {section === 'home' && (
+          <HomeView concerts={concerts} lang={lang} t={t} onOpen={(c) => setDetail(c.id)} />
         )}
-        {tab === 'history' && (
-          <HistoryView concerts={past} lang={lang} t={t} onOpen={(c) => setDetail(c.id)} />
+        {section === 'events' && (
+          <EventsView concerts={upcoming} lang={lang} t={t} onOpen={(c) => setDetail(c.id)} />
         )}
-        {tab === 'stats' && <StatsView concerts={concerts} lang={lang} t={t} />}
-        {tab === 'settings' && (
-          <SettingsView
-            concerts={concerts}
-            t={t}
+        {section === 'history' && (
+          <HistoryView
+            concerts={pastMatching}
             lang={lang}
-            onLang={() => setLang(lang === 'es' ? 'en' : 'es')}
-            isDark={isDark}
-            onTheme={() => setIsDark((v) => !v)}
-            onImport={importConcerts}
-            onToast={setToast}
+            t={t}
+            onOpen={(c) => setDetail(c.id)}
+            query={query}
+            onQuery={setQuery}
+            searchable={past.length >= SEARCHABLE_FROM}
           />
         )}
       </main>
-
-      {(tab === 'home' || tab === 'history') && (
-        <button type="button" className="fab" onClick={() => setEditing({})} aria-label={t('add')}>
-          +
-        </button>
-      )}
-
-      <TabBar tab={tab} onTab={setTab} t={t} />
 
       {editing && (
         <ConcertForm
@@ -179,6 +161,21 @@ export default function App() {
           onDelete={deleteConcert}
           onClose={() => setDetail(null)}
         />
+      )}
+
+      {settingsOpen && (
+        <Modal title={t('tabSettings')} onClose={() => setSettingsOpen(false)} closeLabel={t('close')}>
+          <SettingsView
+            concerts={concerts}
+            t={t}
+            lang={lang}
+            onLang={() => setLang(lang === 'es' ? 'en' : 'es')}
+            isDark={isDark}
+            onTheme={() => setIsDark((v) => !v)}
+            onImport={importConcerts}
+            onToast={setToast}
+          />
+        </Modal>
       )}
 
       {toast && <div className="toast">{toast}</div>}

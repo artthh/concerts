@@ -49,6 +49,20 @@ export default function ConcertForm({ concert, t, onSave, onClose, onError }) {
         </div>
 
         <div className="field">
+          <label className="field__label" htmlFor="emoji">
+            {t('emoji')}
+          </label>
+          <input
+            id="emoji"
+            className="input input--emoji"
+            value={draft.emoji}
+            onChange={set('emoji')}
+            maxLength={4}
+          />
+          <div className="field__hint">{t('emojiHint')}</div>
+        </div>
+
+        <div className="field">
           <span className="field__label">{t('photo')}</span>
           <PhotoPicker
             value={draft.photo}

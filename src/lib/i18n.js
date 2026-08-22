@@ -5,8 +5,9 @@ const STRINGS = {
   es: {
     appName: 'Encore',
     tagline: 'Los conciertos que vienen y los que ya viviste',
-    tabHome: 'Inicio',
-    tabHistory: 'Historial',
+    navHome: 'Home',
+    navEvents: 'Events',
+    navHistory: 'History',
     tabStats: 'Números',
     tabSettings: 'Ajustes',
 
@@ -31,11 +32,13 @@ const STRINGS = {
     nextUp: 'El siguiente',
     countdown: 'Cuenta regresiva',
     yesterday: 'Ayer',
-    daysLeft: 'días para el show',
-    daysSince: 'días desde el show',
+    daysLeft: 'días restantes',
+    daysSince: 'días desde',
 
     artist: 'Artista',
     photo: 'Foto del artista',
+    emoji: 'Emoji',
+    emojiHint: 'Se muestra junto al nombre en las tarjetas.',
     photoHint: 'Se recorta automáticamente para las tarjetas del inicio.',
     addPhoto: 'Elegir foto',
     changePhoto: 'Cambiar foto',
@@ -94,8 +97,9 @@ const STRINGS = {
   en: {
     appName: 'Encore',
     tagline: 'The shows ahead and the ones you already lived',
-    tabHome: 'Home',
-    tabHistory: 'History',
+    navHome: 'Home',
+    navEvents: 'Events',
+    navHistory: 'History',
     tabStats: 'Stats',
     tabSettings: 'Settings',
 
@@ -125,6 +129,8 @@ const STRINGS = {
 
     artist: 'Artist',
     photo: 'Artist photo',
+    emoji: 'Emoji',
+    emojiHint: 'Shown next to the name on the cards.',
     photoHint: 'Cropped automatically for the home cards.',
     addPhoto: 'Choose photo',
     changePhoto: 'Change photo',
@@ -204,6 +210,31 @@ export function formatDate(dateISO, lang) {
     month: 'short',
     year: 'numeric',
   })
+}
+
+const MONTHS_ES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+]
+
+// 1st, 2nd, 3rd, 4th... 11th, 12th, 13th, 21st.
+function ordinal(day) {
+  if (day % 100 >= 11 && day % 100 <= 13) return day + 'th'
+  return day + ['th', 'st', 'nd', 'rd'][day % 10 > 3 ? 0 : day % 10]
+}
+
+// The card format: "September 9th | 2026" / "9 de septiembre | 2026".
+export function formatEventDate(dateISO, lang) {
+  const parsed = Date.parse(String(dateISO) + 'T00:00:00')
+  if (Number.isNaN(parsed)) return String(dateISO || '')
+  const date = new Date(parsed)
+  const day = date.getDate()
+  const year = date.getFullYear()
+  if (lang === 'en') {
+    const month = date.toLocaleDateString('en-US', { month: 'long' })
+    return `${month} ${ordinal(day)} | ${year}`
+  }
+  return `${day} de ${MONTHS_ES[date.getMonth()]} | ${year}`
 }
 
 export function formatMoney(amount, currency, lang) {

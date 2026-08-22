@@ -7,22 +7,31 @@ full-screen, like the `mi-gym` app.
 - **Stack:** Vite + React 19, no backend, no CSS framework.
 - **Storage:** `localStorage` on the device, with JSON backup export/import.
 - **Photos:** picked from the phone, cropped and downscaled in the browser.
-- **Languages:** Spanish (default) and English, toggled in the header.
-- **Theme:** dark/light, following the system preference until you pick one.
+- **Languages:** Spanish (default) and English, toggled in settings.
+- **Theme:** dark by default (the design is dark-first); light is available in
+  settings.
 
-## How the two sections work
+## The three sections
 
-**Home** stacks the upcoming shows in a pile, soonest at the front. Each card
-shows the artist photo on one edge and the days left on the other, and the photo
-side alternates down the pile — left, right, left — so consecutive cards mirror
-each other. The side comes from the card's position, so it stays alternating
-when a new show slots into the middle.
+Navigation is the pill row at the top; `+` adds a show and the 🎤 opens
+settings.
 
-**History** shows the same cards for shows whose date has passed, grouped by
-year, counting the days *since* instead of the days left.
+**Events** is the main list: upcoming shows, soonest first. Each card carries
+the artist photo on one edge — clipped to a diagonal and feathered so it bleeds
+into the card — with the name, the date and the days left on the other. The
+photo side alternates down the list, left / right / left, and because the side
+comes from the card's position it re-alternates when a show slots into the
+middle.
 
-Nothing has to be moved by hand: the date is the only thing that decides which
-section a concert is in, so a show leaves Home on its own the day after it
+**History** is the same card for shows whose date has passed, grouped by year
+and counting the days *since*. A search field appears once there are eight or
+more of them.
+
+**Home** is the overview: the next show, then the running numbers (totals,
+ticket spend, per-year counts, most seen artists and cities).
+
+Nothing is moved by hand — the date is the only thing that decides which
+section a concert is in, so a show leaves Events on its own the day after it
 happens. There is no status field to keep in sync.
 
 ## Getting started
@@ -70,7 +79,7 @@ public/
 scripts/make-icons.mjs      dependency-free PNG icon generator
 src/
   main.jsx                  React entry point
-  App.jsx                   state, persistence, tab routing
+  App.jsx                   state, persistence, section routing
   index.css                 design tokens + all component styles
   lib/
     storage.js              localStorage keys, backup envelope
@@ -78,9 +87,9 @@ src/
     photos.js               crop/downscale + per-concert photo storage
     i18n.js                 ES/EN strings, date and money formatting
   components/
-    Header.jsx              title, theme/language toggles, search
-    TabBar.jsx              bottom navigation
-    UpcomingView.jsx        the Home pile
+    TopNav.jsx              mic, section pills, add button
+    HomeView.jsx            next show + the numbers
+    EventsView.jsx          upcoming shows
     HistoryView.jsx         past shows grouped by year
     ShowCard.jsx            one card: photo on one edge, countdown on the other
     StatsView.jsx           totals, spend, per-year and top-N bars
@@ -100,6 +109,7 @@ One flat, JSON-safe object per concert, defined in `src/lib/concerts.js`:
 | -------------------------- | -------------------------------------------- |
 | `id`                       | local UUID                                   |
 | `artist`                   | headliner, the only required field           |
+| `emoji`                    | shown after the name on the cards            |
 | `photo`                    | cropped artist photo, stored as a data URL   |
 | `openers`, `company`       | string arrays, edited as one-per-line text   |
 | `tour`                     | tour or festival name                        |
@@ -113,11 +123,12 @@ One flat, JSON-safe object per concert, defined in `src/lib/concerts.js`:
 | `createdAt`, `updatedAt`   | ISO timestamps                               |
 
 A concert counts as **upcoming** through the end of its own day, then moves to
-the history tab on its own — there is no status field to maintain.
+History on its own — there is no status field to maintain.
 
 ## Photos and the storage budget
 
-Adding a show takes three things: artist, photo and date. The picked file is
+Adding a show takes three things: artist, photo and date, plus an optional
+emoji. Everything else is folded behind "more details". The picked file is
 center-cropped to the card's aspect ratio and re-encoded as a 640x420 JPEG
 before it is stored, which turns a multi-megabyte camera roll photo into about
 65 KB.

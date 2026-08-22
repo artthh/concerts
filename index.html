@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Encore" />
-    <meta name="theme-color" content="#0a0712" />
+    <meta name="theme-color" content="#000000" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -18,14 +18,13 @@
          home-screen launch never flashes white. */
       (function () {
         try {
-          var stored = localStorage.getItem('concerts.theme')
-          var dark = stored ? stored === 'dark'
-            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          /* The design is dark-first, so dark is the default. */
+          var dark = localStorage.getItem('concerts.theme') !== 'light'
           document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-          document.documentElement.style.backgroundColor = dark ? '#0a0712' : '#f4f2f8'
+          document.documentElement.style.backgroundColor = dark ? '#000000' : '#f4f2f8'
         } catch (e) {
-          document.documentElement.dataset.theme = 'light'
-          document.documentElement.style.backgroundColor = '#f4f2f8'
+          document.documentElement.dataset.theme = 'dark'
+          document.documentElement.style.backgroundColor = '#000000'
         }
       })()
     </script>
