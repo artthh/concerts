@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Tracker de conciertos: los que vienen y los que ya viviste." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Encore" />
+    <meta name="theme-color" content="#0a0712" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Encore</title>
+    <script>
+      /* Paint the background before the CSS/JS bundle loads so the
+         home-screen launch never flashes white. */
+      (function () {
+        try {
+          var stored = localStorage.getItem('concerts.theme')
+          var dark = stored ? stored === 'dark'
+            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+          document.documentElement.style.backgroundColor = dark ? '#0a0712' : '#f4f2f8'
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light'
+          document.documentElement.style.backgroundColor = '#f4f2f8'
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
