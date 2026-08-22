@@ -29,7 +29,7 @@ export default function SettingsView({ concerts, t, lang, onLang, isDark, onThem
     try {
       const imported = readBackup(JSON.parse(await file.text()))
       if (!imported) throw new Error('unrecognized backup')
-      const added = onImport(imported, importMode.current)
+      const added = await onImport(imported, importMode.current)
       onToast(t('importDone', { n: added }))
     } catch {
       onToast(t('importFailed'))

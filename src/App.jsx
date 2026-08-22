@@ -8,12 +8,23 @@ import SettingsView from './components/SettingsView.jsx'
 import ConcertForm from './components/ConcertForm.jsx'
 import ConcertDetail from './components/ConcertDetail.jsx'
 import { KEYS, load, save } from './lib/storage.js'
+import { getPhoto, removePhoto, storePhoto } from './lib/photos.js'
 import { isUpcoming, matchesQuery, normalizeConcert } from './lib/concerts.js'
 import { translator } from './lib/i18n.js'
 
+// Photos are kept in their own storage keys, so the concerts blob written on
+// every edit stays small. In memory each record carries its own photo.
+const withPhotos = (list) => list.map((c) => ({ ...c, photo: c.photo || getPhoto(c.id) }))
+const withoutPhotos = (list) =>
+  list.map((c) => {
+    const copy = { ...c }
+    delete copy.photo
+    return copy
+  })
+
 export default function App() {
   const [concerts, setConcerts] = useState(() =>
-    load(KEYS.concerts, []).map((c) => normalizeConcert(c)),
+    withPhotos(load(KEYS.concerts, []).map((c) => normalizeConcert(c))),
   )
   const [lang, setLang] = useState(() => load(KEYS.lang, 'es'))
   const [isDark, setIsDark] = useState(() => {
@@ -21,7 +32,7 @@ export default function App() {
     if (stored) return stored === 'dark'
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
   })
-  const [tab, setTab] = useState('upcoming')
+  const [tab, setTab] = useState('home')
   const [query, setQuery] = useState('')
   const [editing, setEditing] = useState(null) // concert draft in the form sheet
   const [detail, setDetail] = useState(null) // concert id open in the detail sheet
@@ -30,7 +41,7 @@ export default function App() {
   const t = useMemo(() => translator(lang), [lang])
 
   useEffect(() => {
-    save(KEYS.concerts, concerts)
+    save(KEYS.concerts, withoutPhotos(concerts))
   }, [concerts])
 
   useEffect(() => {
@@ -46,7 +57,7 @@ export default function App() {
 
   useEffect(() => {
     if (!toast) return
-    const timer = setTimeout(() => setToast(''), 2400)
+    const timer = setTimeout(() => setToast(''), 2800)
     return () => clearTimeout(timer)
   }, [toast])
 
@@ -54,42 +65,51 @@ export default function App() {
     () => concerts.filter((c) => matchesQuery(c, query)),
     [concerts, query],
   )
+  // The date alone decides which section a show belongs to, so a concert moves
+  // itself to the history tab the day after it happens.
   const upcoming = visible.filter((c) => isUpcoming(c))
   const past = visible.filter((c) => !isUpcoming(c))
   const openConcert = detail ? concerts.find((c) => c.id === detail) : null
 
-  function saveConcert(concert) {
+  async function saveConcert(concert) {
+    const storedPhoto = await storePhoto(concert.id, concert.photo)
+    const saved = storedPhoto ? concert : { ...concert, photo: '' }
     setConcerts((list) => {
-      const index = list.findIndex((c) => c.id === concert.id)
-      if (index === -1) return [...list, concert]
+      const index = list.findIndex((c) => c.id === saved.id)
+      if (index === -1) return [...list, saved]
       const next = [...list]
-      next[index] = concert
+      next[index] = saved
       return next
     })
     setEditing(null)
-    setDetail(concert.id)
+    setDetail(saved.id)
+    if (!storedPhoto) setToast(t('photoNotSaved'))
   }
 
   function deleteConcert(id) {
+    removePhoto(id)
     setConcerts((list) => list.filter((c) => c.id !== id))
     setDetail(null)
   }
 
   // Merge keeps existing records and adds the ones this device does not have.
-  function importConcerts(imported, mode) {
+  async function importConcerts(imported, mode) {
     const incoming = imported.map((c) => normalizeConcert(c))
-    if (mode === 'replace') {
-      setConcerts(incoming)
-      return incoming.length
+    const known = new Set(concerts.map((c) => c.id))
+    const fresh = mode === 'replace' ? incoming : incoming.filter((c) => !known.has(c.id))
+
+    for (const concert of fresh) {
+      if (concert.photo) await storePhoto(concert.id, concert.photo)
     }
-    let added = 0
-    setConcerts((list) => {
-      const seen = new Set(list.map((c) => c.id))
-      const fresh = incoming.filter((c) => !seen.has(c.id))
-      added = fresh.length
-      return [...list, ...fresh]
-    })
-    return added
+    if (mode === 'replace') {
+      for (const concert of concerts) {
+        if (!incoming.some((c) => c.id === concert.id)) removePhoto(concert.id)
+      }
+      setConcerts(fresh)
+    } else {
+      setConcerts((list) => [...list, ...fresh])
+    }
+    return fresh.length
   }
 
   return (
@@ -102,13 +122,13 @@ export default function App() {
         onToggleTheme={() => setIsDark((v) => !v)}
         query={query}
         onQuery={setQuery}
-        showSearch={tab === 'upcoming' || tab === 'history'}
+        showSearch={tab === 'home' || tab === 'history'}
       />
 
       <main className="app__main">
         {query && visible.length === 0 && <p className="empty">{t('noResults')}</p>}
 
-        {tab === 'upcoming' && (
+        {tab === 'home' && (
           <UpcomingView concerts={upcoming} lang={lang} t={t} onOpen={(c) => setDetail(c.id)} />
         )}
         {tab === 'history' && (
@@ -129,9 +149,9 @@ export default function App() {
         )}
       </main>
 
-      {(tab === 'upcoming' || tab === 'history') && (
-        <button type="button" className="fab" onClick={() => setEditing({})}>
-          + {t('add')}
+      {(tab === 'home' || tab === 'history') && (
+        <button type="button" className="fab" onClick={() => setEditing({})} aria-label={t('add')}>
+          +
         </button>
       )}
 
@@ -142,6 +162,7 @@ export default function App() {
           concert={editing.id ? editing : null}
           t={t}
           onSave={saveConcert}
+          onError={setToast}
           onClose={() => setEditing(null)}
         />
       )}

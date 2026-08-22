@@ -5,6 +5,7 @@
 //   {
 //     id:         string        stable local id
 //     artist:     string        headliner (required)
+//     photo:      string        cropped artist photo as a data URL
 //     openers:    string[]      support acts
 //     tour:       string        tour or festival name
 //     venue:      string
@@ -30,6 +31,7 @@ export function emptyConcert() {
   return {
     id: '',
     artist: '',
+    photo: '',
     openers: [],
     tour: '',
     venue: '',
@@ -58,6 +60,7 @@ export function normalizeConcert(input) {
     ...c,
     id: c.id || newId(),
     artist: String(c.artist || '').trim(),
+    photo: String(c.photo || ''),
     openers: toList(c.openers),
     company: toList(c.company),
     setlist: toList(c.setlist),

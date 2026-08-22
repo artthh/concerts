@@ -16,12 +16,15 @@ function Row({ label, children }) {
 export default function ConcertDetail({ concert, lang, t, onEdit, onDelete, onClose }) {
   return (
     <Modal title={concert.artist} onClose={onClose} closeLabel={t('close')}>
+      {concert.photo && <img className="detail__photo" src={concert.photo} alt="" />}
       <div className="detail__meta">
         <Row label={t('date')}>
           {formatDate(concert.date, lang)}
           {concert.time ? ` · ${concert.time}` : ''}
         </Row>
-        {isUpcoming(concert) && <Row label={t('countdown')}>{relativeDays(daysUntil(concert), t)}</Row>}
+        <Row label={isUpcoming(concert) ? t('countdown') : t('daysSince')}>
+          {relativeDays(daysUntil(concert), t)}
+        </Row>
         <Row label={t('tour')}>{concert.tour}</Row>
         <Row label={t('venue')}>{concert.venue}</Row>
         <Row label={t('city')}>{[concert.city, concert.country].filter(Boolean).join(', ')}</Row>

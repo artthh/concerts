@@ -1,5 +1,5 @@
 import { sortByDate } from '../lib/concerts.js'
-import ConcertList from './ConcertList.jsx'
+import ShowCard from './ShowCard.jsx'
 
 export default function HistoryView({ concerts, lang, t, onOpen }) {
   const sorted = sortByDate(concerts, 'desc')
@@ -17,6 +17,9 @@ export default function HistoryView({ concerts, lang, t, onOpen }) {
     else years.push({ year, items: [concert] })
   }
 
+  // Keep the photo side alternating across the whole list, not per year group.
+  let position = 0
+
   return (
     <>
       {years.map((group) => (
@@ -24,7 +27,18 @@ export default function HistoryView({ concerts, lang, t, onOpen }) {
           <h2 className="section__title">
             {group.year} · {group.items.length}
           </h2>
-          <ConcertList concerts={group.items} lang={lang} t={t} onOpen={onOpen} emptyMessage="" />
+          <div className="show-list">
+            {group.items.map((concert) => (
+              <ShowCard
+                key={concert.id}
+                concert={concert}
+                side={position++ % 2 === 0 ? 'left' : 'right'}
+                lang={lang}
+                t={t}
+                onOpen={onOpen}
+              />
+            ))}
+          </div>
         </section>
       ))}
     </>

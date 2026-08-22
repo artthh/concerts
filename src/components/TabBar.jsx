@@ -1,5 +1,5 @@
 const TABS = [
-  { id: 'upcoming', icon: '🎟', label: 'tabUpcoming' },
+  { id: 'home', icon: '🎟', label: 'tabHome' },
   { id: 'history', icon: '🎸', label: 'tabHistory' },
   { id: 'stats', icon: '📊', label: 'tabStats' },
   { id: 'settings', icon: '⚙', label: 'tabSettings' },
