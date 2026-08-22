@@ -129,9 +129,12 @@ export default function App() {
         {section === 'history' && (
           <HistoryView
             concerts={pastMatching}
+            allConcerts={concerts}
             lang={lang}
             t={t}
             onOpen={(c) => setDetail(c.id)}
+            onImport={importConcerts}
+            onToast={setToast}
             query={query}
             onQuery={setQuery}
             searchable={past.length >= SEARCHABLE_FROM}

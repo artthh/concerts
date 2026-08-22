@@ -232,6 +232,31 @@ textarea {
   color: var(--text-3);
 }
 
+/* Backup --------------------------------------------------------------- */
+
+.backup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.backup--compact {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.backup button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.backup__note {
+  margin: 8px 0 18px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-3);
+}
+
 /* Event cards ------------------------------------------------------------ */
 
 .show-list {

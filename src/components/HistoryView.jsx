@@ -1,7 +1,19 @@
 import { sortByDate } from '../lib/concerts.js'
+import BackupPanel from './BackupPanel.jsx'
 import ShowCard from './ShowCard.jsx'
 
-export default function HistoryView({ concerts, lang, t, onOpen, query, onQuery, searchable }) {
+export default function HistoryView({
+  concerts,
+  allConcerts,
+  lang,
+  t,
+  onOpen,
+  onImport,
+  onToast,
+  query,
+  onQuery,
+  searchable,
+}) {
   const sorted = sortByDate(concerts, 'desc')
 
   // Group by year so a history that spans a decade stays scannable.
@@ -19,6 +31,19 @@ export default function HistoryView({ concerts, lang, t, onOpen, query, onQuery,
   return (
     <>
       <h1 className="page-title">{t('navHistory')}</h1>
+
+      {/* A restore belongs where the records are: this is the screen you open
+          after reinstalling, when Events is empty and nothing looks familiar.
+          Export covers the whole collection, not just the past shows. */}
+      <BackupPanel
+        concerts={allConcerts}
+        t={t}
+        onImport={onImport}
+        onToast={onToast}
+        compact
+      />
+      <p className="backup__note">{t('backupNote')}</p>
+
       {searchable && (
         <input
           className="search"
@@ -28,6 +53,7 @@ export default function HistoryView({ concerts, lang, t, onOpen, query, onQuery,
           onChange={(event) => onQuery(event.target.value)}
         />
       )}
+
       {sorted.length === 0 ? (
         <p className="empty">{query ? t('noResults') : t('emptyHistory')}</p>
       ) : (

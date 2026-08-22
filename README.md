@@ -24,8 +24,10 @@ comes from the card's position it re-alternates when a show slots into the
 middle.
 
 **History** is the same card for shows whose date has passed, grouped by year
-and counting the days *since*. A search field appears once there are eight or
-more of them.
+and counting the days *since*. It also carries **Export** and **Import** at the
+top: this is the screen you open after reinstalling, so a restore belongs where
+the records are. Export writes the whole collection, not just the past shows.
+A search field appears once there are eight or more of them.
 
 **Home** is the overview: the next show, then the running numbers (totals,
 ticket spend, per-year counts, most seen artists and cities).
@@ -42,7 +44,7 @@ npm run dev      # local dev server
 npm run build    # production build into dist/
 npm run preview  # serve the production build
 npm run lint
-npm run icons    # regenerate the PNG app icons from scripts/make-icons.mjs
+npm run icons    # regenerate the PNG app icons (needs a local Chrome/Chromium)
 ```
 
 ## Deploying
@@ -64,19 +66,30 @@ Vercel, import this repo and keep the defaults:
    the `apple-mobile-web-app-*` tags in `index.html` handle that.
 
 Because the data lives in `localStorage`, it belongs to that one browser on that
-one device. Use **Settings → Export backup** before switching phones or
-browsers, and **Import** to bring it back.
+one device — clearing site data or moving phones loses it. Use **Export** at the
+top of History (or Settings → Export backup) to save a JSON file with every
+concert, photos included, and **Import** to bring one back. Import merges by
+record id, so re-importing the same file adds nothing and importing a second
+device's file combines the two. Settings also has a **Replace everything** for
+when you want the file to win outright.
+
+## Regenerating the icons
+
+`public/icon.svg` and the PNGs are the 🎤 emoji on a dark gradient. An emoji
+needs a real font renderer, so `npm run icons` drives a headless Chrome and
+screenshots the glyph — no npm dependency, but it needs a Chrome or Chromium on
+the machine. Set `CHROME_PATH` if yours is somewhere unusual.
 
 ## Project layout
 
 ```
 index.html                  PWA meta tags + the pre-paint theme script
 public/
-  icon.svg                  source artwork for the icons
+  icon.svg                  source artwork: the mic emoji on a dark gradient
   manifest.webmanifest      home-screen install manifest
   apple-touch-icon.png      generated (npm run icons)
   icon-*.png                generated (npm run icons)
-scripts/make-icons.mjs      dependency-free PNG icon generator
+scripts/make-icons.mjs      PNG icon generator (headless Chrome, no npm deps)
 src/
   main.jsx                  React entry point
   App.jsx                   state, persistence, section routing
@@ -93,7 +106,8 @@ src/
     HistoryView.jsx         past shows grouped by year
     ShowCard.jsx            one card: photo on one edge, countdown on the other
     StatsView.jsx           totals, spend, per-year and top-N bars
-    SettingsView.jsx        theme, language, backup export/import
+    SettingsView.jsx        theme, language, backup
+    BackupPanel.jsx         export/import, shared by History and Settings
     ConcertForm.jsx         add/edit sheet
     PhotoPicker.jsx         photo field with crop preview
     ConcertDetail.jsx       read-only sheet with setlist
