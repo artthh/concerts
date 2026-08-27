@@ -21,6 +21,8 @@ const STRINGS = {
   noResults: 'Nothing matches your search.',
 
   emptyUpcoming: 'Nothing on the calendar. Add the next one.',
+  emptyHome: 'Nothing on the calendar. Add one from Events.',
+  numbers: 'Numbers',
   emptyHistory: 'No events in your history yet.',
   emptyStats: 'Add events to see your numbers.',
 

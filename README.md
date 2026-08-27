@@ -31,8 +31,8 @@ often, then by how recently.
 
 Each screen's header is its title on the left with settings and the profile
 photo on the right. Navigation is a floating translucent bar centred at the
-bottom, with the content scrolling visibly underneath it, and `+` floats just
-above it.
+bottom, with the content scrolling visibly underneath it. Adding belongs to
+Events: `+` floats above the bar there and nowhere else.
 
 **Events** is the main list: upcoming events, soonest first. The page title
 *is* the category switcher — tapping "Concerts" opens Concerts / Movies /
@@ -46,14 +46,16 @@ re-alternates when an event slots into the middle.
 and counting the days *since*, across every category. It also carries
 **Export** and **Import** at the top: this is the screen you open after
 reinstalling, so a restore belongs where the records are. A search field
-appears once there are eight or more.
+appears once there are eight or more. Below the records are the **Numbers** —
+totals, ticket spend, per-year counts, most seen titles and cities — computed
+over every event, not just the past ones on screen.
 
-**Home** is the overview: the very next event as a full-width hero, the ones
-after it as a grid of small tiles three across, then the running numbers. All
-three categories mix here, ordered purely by date — Home answers "what is
-next", not "what kind". The tiles are deliberately tight: at that size they
-carry the countdown and the title only, since the point is seeing a lot of the
-calendar at once rather than every detail.
+**Home** is the landing screen and stays deliberately bare: the very next event
+as a full-width hero, the ones after it as a grid of small tiles three across,
+and nothing else. All three categories mix here, ordered purely by date — Home
+answers "what is next", not "what kind". The tiles are tight on purpose: at
+that size they carry the countdown and the title only, since the point is
+seeing a lot of the calendar at once rather than every detail.
 
 Nothing is moved by hand — the date is the only thing that decides which
 section an event is in, so it leaves Events on its own the day after it
@@ -134,9 +136,9 @@ src/
     PageHeader.jsx          title, settings and profile photo on one line
     BottomNav.jsx           floating translucent section bar
     Icons.jsx               inline line icons
-    HomeView.jsx            hero for the next event, grid, then the numbers
+    HomeView.jsx            hero for the next event, then the tile grid
     EventsView.jsx          upcoming events + the category switcher
-    HistoryView.jsx         past events grouped by year
+    HistoryView.jsx         past events by year, backup, then the numbers
     EventCard.jsx           one card: photo on one edge, countdown on the other
     StatsView.jsx           totals, spend, per-year and top-N bars
     SettingsView.jsx        profile photo, theme, backup

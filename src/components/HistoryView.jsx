@@ -2,6 +2,7 @@ import { sortByDate } from '../lib/events.js'
 import { t } from '../lib/i18n.js'
 import BackupPanel from './BackupPanel.jsx'
 import PageHeader from './PageHeader.jsx'
+import StatsView from './StatsView.jsx'
 import EventCard from './EventCard.jsx'
 
 export default function HistoryView({
@@ -72,6 +73,15 @@ export default function HistoryView({
             </div>
           </section>
         ))
+      )}
+
+      {/* The numbers sit below the records they count, rather than in front of
+          them: you come here to look something up first. */}
+      {allEvents.length > 0 && (
+        <section className="section">
+          <h2 className="section__title">{t('numbers')}</h2>
+          <StatsView events={allEvents} />
+        </section>
       )}
     </>
   )

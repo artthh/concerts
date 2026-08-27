@@ -166,10 +166,13 @@ export default function App() {
         )}
       </main>
 
-      {/* The mockup's bottom bar has no add button, so adding floats above it. */}
-      <button type="button" className="fab" onClick={() => setEditing({})} aria-label={t('add')}>
-        +
-      </button>
+      {/* Adding belongs to Events, and the bottom bar has no room for it, so it
+          floats above the bar on that section only. */}
+      {section === 'events' && (
+        <button type="button" className="fab" onClick={() => setEditing({})} aria-label={t('add')}>
+          +
+        </button>
+      )}
 
       <BottomNav section={section} onSection={setSection} />
 

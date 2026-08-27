@@ -1,7 +1,6 @@
 import { daysUntil, isUpcoming, sortByDate } from '../lib/events.js'
 import { formatEventDate, t } from '../lib/i18n.js'
 import PageHeader from './PageHeader.jsx'
-import StatsView from './StatsView.jsx'
 
 // Shared by the hero and the tiles: the number is the point, so today and
 // tomorrow become words and everything else is a plain count.
@@ -71,8 +70,8 @@ function Tile({ event, onOpen }) {
   )
 }
 
-// The overview: the very next event large, then the ones after it as a grid,
-// then the running numbers.
+// The overview, and nothing else: the very next event large, then the ones
+// after it as a grid. The numbers live in History with the records they count.
 export default function HomeView({ events, profilePhoto, onSettings, onOpen }) {
   const upcoming = sortByDate(events.filter((e) => isUpcoming(e)), 'asc')
   const [next, ...rest] = upcoming
@@ -89,7 +88,7 @@ export default function HomeView({ events, profilePhoto, onSettings, onOpen }) {
           <Hero event={next} onOpen={onOpen} />
         </>
       ) : (
-        <p className="empty">{t('emptyUpcoming')}</p>
+        <p className="empty">{t('emptyHome')}</p>
       )}
 
       {rest.length > 0 && (
@@ -102,8 +101,6 @@ export default function HomeView({ events, profilePhoto, onSettings, onOpen }) {
           </div>
         </section>
       )}
-
-      <StatsView events={events} />
     </>
   )
 }
