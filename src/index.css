@@ -105,7 +105,7 @@ textarea {
 
 .app__main {
   flex: 1;
-  padding: 0 16px calc(112px + var(--safe-bottom));
+  padding: 0 16px calc(76px + max(6px, var(--safe-bottom)));
 }
 
 .page-title {
@@ -174,7 +174,7 @@ textarea {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(12px + var(--safe-bottom));
+  bottom: max(6px, var(--safe-bottom));
   z-index: 30;
   display: flex;
   justify-content: center;
@@ -227,7 +227,7 @@ textarea {
 .fab {
   position: fixed;
   right: 18px;
-  bottom: calc(92px + var(--safe-bottom));
+  bottom: calc(72px + max(6px, var(--safe-bottom)));
   z-index: 31;
   width: 52px;
   height: 52px;
@@ -244,7 +244,7 @@ textarea {
 /* Sections --------------------------------------------------------------- */
 
 .section {
-  margin-top: 24px;
+  margin-top: 16px;
 }
 
 .section--tight {
@@ -254,7 +254,7 @@ textarea {
 .page-header + .section__title,
 .page-header + .section,
 .page-header + .backup {
-  margin-top: 18px;
+  margin-top: 12px;
 }
 
 .section__title {
@@ -263,7 +263,7 @@ textarea {
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--text-3);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .empty {
@@ -376,7 +376,7 @@ textarea {
   display: block;
   width: 100%;
   padding: 0;
-  height: 260px;
+  height: 204px;
   overflow: hidden;
   text-align: left;
   border: 1px solid var(--border);
