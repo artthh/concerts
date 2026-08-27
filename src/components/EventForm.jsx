@@ -1,34 +1,35 @@
 import { useState } from 'react'
-import { CURRENCIES, emptyConcert, normalizeConcert } from '../lib/concerts.js'
+import { CURRENCIES, KINDS, KINDS_WITH_EXTRAS, emptyEvent, normalizeEvent } from '../lib/events.js'
 import Modal from './Modal.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 
 // Lists live as arrays in the record but are edited as free text.
 const toText = (list) => (Array.isArray(list) ? list.join('\n') : String(list || ''))
 
-export default function ConcertForm({ concert, t, onSave, onClose, onError }) {
+export default function EventForm({ event, defaultKind, t, onSave, onClose, onError }) {
   const [draft, setDraft] = useState(() => ({
-    ...emptyConcert(),
-    ...(concert || {}),
-    openersText: toText(concert?.openers),
-    companyText: toText(concert?.company),
-    setlistText: toText(concert?.setlist),
+    ...emptyEvent(event?.kind || defaultKind),
+    ...(event || {}),
+    openersText: toText(event?.openers),
+    companyText: toText(event?.company),
+    setlistText: toText(event?.setlist),
   }))
   const [error, setError] = useState('')
-  // Artist, photo and date are all it takes to add a show; everything else
-  // is optional and stays folded away.
+  // Concerts have a long tail of optional fields; movies and shows are just
+  // name, photo, date and venue, so there is nothing to fold away for them.
   const [showExtras, setShowExtras] = useState(false)
+  const hasExtras = KINDS_WITH_EXTRAS.has(draft.kind)
 
-  const set = (key) => (event) => setDraft((d) => ({ ...d, [key]: event.target.value }))
+  const set = (key) => (event_) => setDraft((d) => ({ ...d, [key]: event_.target.value }))
 
-  function submit(event) {
-    event.preventDefault()
-    if (!draft.artist.trim()) {
-      setError(t('artistRequired'))
+  function submit(submitEvent) {
+    submitEvent.preventDefault()
+    if (!draft.title.trim()) {
+      setError(t(`titleRequired_${draft.kind}`))
       return
     }
     onSave(
-      normalizeConcert({
+      normalizeEvent({
         ...draft,
         openers: draft.openersText,
         company: draft.companyText,
@@ -38,13 +39,30 @@ export default function ConcertForm({ concert, t, onSave, onClose, onError }) {
   }
 
   return (
-    <Modal title={concert?.id ? t('edit') : t('add')} onClose={onClose} closeLabel={t('close')}>
+    <Modal title={event?.id ? t('edit') : t('add')} onClose={onClose} closeLabel={t('close')}>
       <form onSubmit={submit}>
         <div className="field">
-          <label className="field__label" htmlFor="artist">
-            {t('artist')}
+          <span className="field__label">{t('category')}</span>
+          <div className="kind-picker">
+            {KINDS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                aria-pressed={draft.kind === option}
+                onClick={() => setDraft((d) => ({ ...d, kind: option }))}
+              >
+                <span aria-hidden="true">{t(`kindIcon_${option}`)}</span>
+                {t(`kind_${option}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="field">
+          <label className="field__label" htmlFor="title">
+            {t(`titleLabel_${draft.kind}`)}
           </label>
-          <input id="artist" className="input" value={draft.artist} onChange={set('artist')} autoFocus />
+          <input id="title" className="input" value={draft.title} onChange={set('title')} autoFocus />
           {error && <div className="field__error">{error}</div>}
         </div>
 
@@ -63,7 +81,7 @@ export default function ConcertForm({ concert, t, onSave, onClose, onError }) {
         </div>
 
         <div className="field">
-          <span className="field__label">{t('photo')}</span>
+          <span className="field__label">{t(`photoLabel_${draft.kind}`)}</span>
           <PhotoPicker
             value={draft.photo}
             t={t}
@@ -73,44 +91,55 @@ export default function ConcertForm({ concert, t, onSave, onClose, onError }) {
           <div className="field__hint">{t('photoHint')}</div>
         </div>
 
-        <div className="field-row">
+        {hasExtras ? (
+          <div className="field-row">
+            <div className="field">
+              <label className="field__label" htmlFor="date">
+                {t('date')}
+              </label>
+              <input id="date" type="date" className="input" value={draft.date} onChange={set('date')} />
+            </div>
+            <div className="field">
+              <label className="field__label" htmlFor="time">
+                {t('time')}
+              </label>
+              <input id="time" type="time" className="input" value={draft.time} onChange={set('time')} />
+            </div>
+          </div>
+        ) : (
           <div className="field">
             <label className="field__label" htmlFor="date">
               {t('date')}
             </label>
             <input id="date" type="date" className="input" value={draft.date} onChange={set('date')} />
           </div>
-          <div className="field">
-            <label className="field__label" htmlFor="time">
-              {t('time')}
-            </label>
-            <input id="time" type="time" className="input" value={draft.time} onChange={set('time')} />
-          </div>
+        )}
+
+        <div className="field">
+          <label className="field__label" htmlFor="venue">
+            {t(`venueLabel_${draft.kind}`)}
+          </label>
+          <input id="venue" className="input" value={draft.venue} onChange={set('venue')} />
         </div>
 
-        <button
-          type="button"
-          className="button"
-          onClick={() => setShowExtras((v) => !v)}
-          aria-expanded={showExtras}
-        >
-          {showExtras ? t('hideDetails') : t('moreDetails')}
-        </button>
+        {hasExtras && (
+          <button
+            type="button"
+            className="button"
+            onClick={() => setShowExtras((v) => !v)}
+            aria-expanded={showExtras}
+          >
+            {showExtras ? t('hideDetails') : t('moreDetails')}
+          </button>
+        )}
 
-        {showExtras && (
+        {hasExtras && showExtras && (
           <div className="form-extras">
             <div className="field">
               <label className="field__label" htmlFor="tour">
                 {t('tour')}
               </label>
               <input id="tour" className="input" value={draft.tour} onChange={set('tour')} />
-            </div>
-
-            <div className="field">
-              <label className="field__label" htmlFor="venue">
-                {t('venue')}
-              </label>
-              <input id="venue" className="input" value={draft.venue} onChange={set('venue')} />
             </div>
 
             <div className="field-row">

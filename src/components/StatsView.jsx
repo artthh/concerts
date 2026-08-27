@@ -1,4 +1,4 @@
-import { buildStats } from '../lib/concerts.js'
+import { KINDS, buildStats } from '../lib/events.js'
 import { formatMoney } from '../lib/i18n.js'
 import Stars from './Stars.jsx'
 
@@ -19,12 +19,12 @@ function Bars({ rows }) {
   )
 }
 
-export default function StatsView({ concerts, lang, t }) {
-  if (concerts.length === 0) {
+export default function StatsView({ events, lang, t }) {
+  if (events.length === 0) {
     return <p className="empty">{t('emptyStats')}</p>
   }
 
-  const stats = buildStats(concerts)
+  const stats = buildStats(events)
 
   return (
     <>
@@ -39,13 +39,27 @@ export default function StatsView({ concerts, lang, t }) {
             <div className="stat__label">{t('pastCount')}</div>
           </div>
           <div className="stat">
-            <div className="stat__value">{stats.artists.length}</div>
+            <div className="stat__value">{stats.titles.length}</div>
             <div className="stat__label">{t('uniqueArtists')}</div>
           </div>
           <div className="stat">
             <div className="stat__value">{stats.cities.length}</div>
             <div className="stat__label">{t('uniqueCities')}</div>
           </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2 className="section__title">{t('byCategory')}</h2>
+        <div className="stat-grid">
+          {KINDS.map((kind) => (
+            <div className="stat" key={kind}>
+              <div className="stat__value">
+                {stats.byKind.find(([k]) => k === kind)?.[1] ?? 0}
+              </div>
+              <div className="stat__label">{t(`kindPlural_${kind}`)}</div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -81,11 +95,11 @@ export default function StatsView({ concerts, lang, t }) {
         </section>
       )}
 
-      {stats.artists.length > 1 && (
+      {stats.titles.length > 1 && (
         <section className="section">
           <h2 className="section__title">{t('topArtists')}</h2>
           <div className="card">
-            <Bars rows={stats.artists.slice(0, 8)} />
+            <Bars rows={stats.titles.slice(0, 8)} />
           </div>
         </section>
       )}
@@ -112,10 +126,10 @@ export default function StatsView({ concerts, lang, t }) {
         <section className="section">
           <h2 className="section__title">{t('bestRated')}</h2>
           <div className="card">
-            {stats.topRated.map((concert) => (
-              <div className="detail__row" key={concert.id}>
-                <span className="bar__label">{concert.artist}</span>
-                <Stars value={concert.rating} />
+            {stats.topRated.map((event) => (
+              <div className="detail__row" key={event.id}>
+                <span className="bar__label">{event.title}</span>
+                <Stars value={event.rating} />
               </div>
             ))}
           </div>

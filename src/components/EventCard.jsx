@@ -1,10 +1,10 @@
-import { daysUntil } from '../lib/concerts.js'
+import { daysUntil } from '../lib/events.js'
 import { formatEventDate } from '../lib/i18n.js'
 
-// One event row. `side` decides which edge the artist photo sits on; the photo
-// is clipped to a diagonal and feathered into the card so it bleeds inward.
-export default function ShowCard({ concert, side, lang, t, onOpen }) {
-  const delta = daysUntil(concert)
+// One event row. `side` decides which edge the photo sits on; the photo is
+// clipped to a diagonal and feathered into the card so it bleeds inward.
+export default function EventCard({ event, side, lang, t, onOpen }) {
+  const delta = daysUntil(event)
   const past = delta !== null && delta < 0
 
   // A plain count reads better than "in 1 days"; today and tomorrow get words.
@@ -22,22 +22,23 @@ export default function ShowCard({ concert, side, lang, t, onOpen }) {
   }
 
   return (
-    <button type="button" className={`show show--${side}`} onClick={() => onOpen(concert)}>
+    <button type="button" className={`show show--${side}`} onClick={() => onOpen(event)}>
       <span className="show__photo">
-        {concert.photo ? (
-          <img src={concert.photo} alt="" />
+        {event.photo ? (
+          <img src={event.photo} alt="" />
         ) : (
           <span className="show__photo-empty" aria-hidden="true">
-            🎤
+            {t(`kindIcon_${event.kind}`)}
           </span>
         )}
       </span>
       <span className="show__body">
         <span className="show__artist">
-          {concert.artist || '—'}
-          {concert.emoji && <span className="show__emoji"> {concert.emoji}</span>}
+          {event.title || '—'}
+          {event.emoji && <span className="show__emoji"> {event.emoji}</span>}
         </span>
-        <span className="show__date">{formatEventDate(concert.date, lang)}</span>
+        {event.venue && <span className="show__venue">{event.venue}</span>}
+        <span className="show__date">{formatEventDate(event.date, lang)}</span>
         <span className="show__count">
           <span className={label ? 'show__count-n' : 'show__count-n show__count-n--word'}>
             {count}

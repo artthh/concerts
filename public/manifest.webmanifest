@@ -1,7 +1,7 @@
 {
-  "name": "Encore — Concert Tracker",
+  "name": "Encore — Event Tracker",
   "short_name": "Encore",
-  "description": "Track the concerts you are going to and the ones you already lived.",
+  "description": "Track the concerts, movies and shows you are going to and the ones you already lived.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

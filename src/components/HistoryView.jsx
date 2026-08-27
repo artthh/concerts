@@ -1,10 +1,10 @@
-import { sortByDate } from '../lib/concerts.js'
+import { sortByDate } from '../lib/events.js'
 import BackupPanel from './BackupPanel.jsx'
-import ShowCard from './ShowCard.jsx'
+import EventCard from './EventCard.jsx'
 
 export default function HistoryView({
-  concerts,
-  allConcerts,
+  events,
+  allEvents,
   lang,
   t,
   onOpen,
@@ -14,15 +14,15 @@ export default function HistoryView({
   onQuery,
   searchable,
 }) {
-  const sorted = sortByDate(concerts, 'desc')
+  const sorted = sortByDate(events, 'desc')
 
   // Group by year so a history that spans a decade stays scannable.
   const years = []
-  for (const concert of sorted) {
-    const year = String(concert.date || '').slice(0, 4) || '—'
+  for (const event of sorted) {
+    const year = String(event.date || '').slice(0, 4) || '—'
     const last = years[years.length - 1]
-    if (last && last.year === year) last.items.push(concert)
-    else years.push({ year, items: [concert] })
+    if (last && last.year === year) last.items.push(event)
+    else years.push({ year, items: [event] })
   }
 
   // Alternate across the whole list, not per year group.
@@ -34,14 +34,8 @@ export default function HistoryView({
 
       {/* A restore belongs where the records are: this is the screen you open
           after reinstalling, when Events is empty and nothing looks familiar.
-          Export covers the whole collection, not just the past shows. */}
-      <BackupPanel
-        concerts={allConcerts}
-        t={t}
-        onImport={onImport}
-        onToast={onToast}
-        compact
-      />
+          Export covers every category, not just the past events. */}
+      <BackupPanel events={allEvents} t={t} onImport={onImport} onToast={onToast} compact />
       <p className="backup__note">{t('backupNote')}</p>
 
       {searchable && (
@@ -63,10 +57,10 @@ export default function HistoryView({
               {group.year} · {group.items.length}
             </h2>
             <div className="show-list">
-              {group.items.map((concert) => (
-                <ShowCard
-                  key={concert.id}
-                  concert={concert}
+              {group.items.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
                   side={position++ % 2 === 0 ? 'left' : 'right'}
                   lang={lang}
                   t={t}

@@ -1,6 +1,6 @@
 import BackupPanel from './BackupPanel.jsx'
 
-export default function SettingsView({ concerts, t, lang, onLang, isDark, onTheme, onImport, onToast }) {
+export default function SettingsView({ events, t, lang, onLang, isDark, onTheme, onImport, onToast }) {
   return (
     <>
       <section className="section section--tight">
@@ -21,7 +21,7 @@ export default function SettingsView({ concerts, t, lang, onLang, isDark, onThem
         <h2 className="section__title">{t('data')}</h2>
         <div className="card">
           <BackupPanel
-            concerts={concerts}
+            events={events}
             t={t}
             onImport={onImport}
             onToast={onToast}

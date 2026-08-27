@@ -232,6 +232,319 @@ textarea {
   color: var(--text-3);
 }
 
+/* Category switcher ------------------------------------------------------ */
+
+.category {
+  position: relative;
+}
+
+.category__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.category__chevron {
+  font-size: 20px;
+  color: var(--accent);
+  transition: transform 0.18s ease;
+}
+
+.category__chevron--open {
+  transform: rotate(180deg);
+}
+
+.category__menu {
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  left: 0;
+  min-width: 232px;
+  margin-top: -6px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.category__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.category__option[aria-current='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.category__icon {
+  font-size: 17px;
+}
+
+.category__count {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Home: one big next event, then a grid ---------------------------------- */
+
+.hero {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  height: 260px;
+  overflow: hidden;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--card);
+}
+
+.hero__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero__photo--empty {
+  display: grid;
+  place-items: center;
+  font-size: 64px;
+  background: linear-gradient(150deg, var(--card-2), var(--card-edge));
+}
+
+/* The scrim is what keeps the text legible over any photo. */
+.hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.55) 52%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
+}
+
+.hero__body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 16px 18px;
+  color: #fff;
+}
+
+.hero__kind {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+
+.hero__title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+}
+
+.hero__emoji {
+  font-size: 22px;
+}
+
+.hero__meta {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero__count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.hero__count-n {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1.4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero__count-n--word {
+  font-size: 28px;
+  letter-spacing: -0.6px;
+}
+
+.hero__count-label {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  position: relative;
+  display: block;
+  padding: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+}
+
+.tile__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tile__photo--empty {
+  display: grid;
+  place-items: center;
+  font-size: 38px;
+  background: linear-gradient(150deg, var(--card-2), var(--card-edge));
+}
+
+.tile__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.6) 55%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+}
+
+.tile__body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  color: #fff;
+}
+
+.tile__count {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.tile__count-n {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tile__count-n--word {
+  font-size: 17px;
+  letter-spacing: -0.3px;
+}
+
+.tile__count-label {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.tile__title {
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile__meta {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Kind picker in the form ------------------------------------------------ */
+
+.kind-picker {
+  display: flex;
+  gap: 8px;
+}
+
+.kind-picker button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.kind-picker button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 /* Backup --------------------------------------------------------------- */
 
 .backup {
@@ -269,7 +582,7 @@ textarea {
   position: relative;
   display: block;
   width: 100%;
-  height: 120px;
+  height: 136px;
   padding: 0;
   overflow: hidden;
   text-align: left;
@@ -350,8 +663,17 @@ textarea {
   margin-right: 38%;
 }
 
+.show__venue {
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .show__artist {
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.4px;
   white-space: nowrap;
@@ -375,7 +697,7 @@ textarea {
   display: flex;
   align-items: baseline;
   gap: 7px;
-  margin-top: 5px;
+  margin-top: 4px;
   min-width: 0;
 }
 

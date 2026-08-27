@@ -5,7 +5,7 @@ import { exportBackup, readBackup } from '../lib/storage.js'
 // restore is reachable right where the records are) and Settings (full width,
 // where the destructive replace also lives).
 export default function BackupPanel({
-  concerts,
+  events,
   t,
   onImport,
   onToast,
@@ -16,7 +16,7 @@ export default function BackupPanel({
   const importMode = useRef('merge')
 
   function download() {
-    const blob = new Blob([JSON.stringify(exportBackup(concerts), null, 2)], {
+    const blob = new Blob([JSON.stringify(exportBackup(events), null, 2)], {
       type: 'application/json',
     })
     const url = URL.createObjectURL(blob)
@@ -54,7 +54,7 @@ export default function BackupPanel({
         type="button"
         className={compact ? buttonClass : 'button button--primary'}
         onClick={download}
-        disabled={concerts.length === 0}
+        disabled={events.length === 0}
       >
         {compact ? t('exportFile') : t('exportBackup')}
       </button>

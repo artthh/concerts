@@ -4,20 +4,20 @@ import HomeView from './components/HomeView.jsx'
 import EventsView from './components/EventsView.jsx'
 import HistoryView from './components/HistoryView.jsx'
 import SettingsView from './components/SettingsView.jsx'
-import ConcertForm from './components/ConcertForm.jsx'
-import ConcertDetail from './components/ConcertDetail.jsx'
+import EventForm from './components/EventForm.jsx'
+import EventDetail from './components/EventDetail.jsx'
 import Modal from './components/Modal.jsx'
 import { KEYS, load, save } from './lib/storage.js'
 import { getPhoto, removePhoto, storePhoto } from './lib/photos.js'
-import { isUpcoming, matchesQuery, normalizeConcert } from './lib/concerts.js'
+import { DEFAULT_KIND, KINDS, isUpcoming, matchesQuery, normalizeEvent } from './lib/events.js'
 import { translator } from './lib/i18n.js'
 
-// Photos are kept in their own storage keys, so the concerts blob written on
+// Photos are kept in their own storage keys, so the events blob written on
 // every edit stays small. In memory each record carries its own photo.
-const withPhotos = (list) => list.map((c) => ({ ...c, photo: c.photo || getPhoto(c.id) }))
+const withPhotos = (list) => list.map((e) => ({ ...e, photo: e.photo || getPhoto(e.id) }))
 const withoutPhotos = (list) =>
-  list.map((c) => {
-    const copy = { ...c }
+  list.map((e) => {
+    const copy = { ...e }
     delete copy.photo
     return copy
   })
@@ -26,28 +26,36 @@ const withoutPhotos = (list) =>
 const SEARCHABLE_FROM = 8
 
 export default function App() {
-  const [concerts, setConcerts] = useState(() =>
-    withPhotos(load(KEYS.concerts, []).map((c) => normalizeConcert(c))),
+  const [events, setEvents] = useState(() =>
+    withPhotos(load(KEYS.concerts, []).map((e) => normalizeEvent(e))),
   )
   const [lang, setLang] = useState(() => load(KEYS.lang, 'es'))
   const [isDark, setIsDark] = useState(() => load(KEYS.theme, 'dark') !== 'light')
   const [section, setSection] = useState('events')
+  const [kind, setKind] = useState(() => {
+    const stored = load(KEYS.kind, DEFAULT_KIND)
+    return KINDS.includes(stored) ? stored : DEFAULT_KIND
+  })
   const [query, setQuery] = useState('')
-  const [editing, setEditing] = useState(null) // concert draft in the form sheet
-  const [detail, setDetail] = useState(null) // concert id open in the detail sheet
+  const [editing, setEditing] = useState(null) // event draft in the form sheet
+  const [detail, setDetail] = useState(null) // event id open in the detail sheet
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [toast, setToast] = useState('')
 
   const t = useMemo(() => translator(lang), [lang])
 
   useEffect(() => {
-    save(KEYS.concerts, withoutPhotos(concerts))
-  }, [concerts])
+    save(KEYS.concerts, withoutPhotos(events))
+  }, [events])
 
   useEffect(() => {
     save(KEYS.lang, lang)
     document.documentElement.lang = lang
   }, [lang])
+
+  useEffect(() => {
+    save(KEYS.kind, kind)
+  }, [kind])
 
   useEffect(() => {
     save(KEYS.theme, isDark ? 'dark' : 'light')
@@ -61,18 +69,24 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [toast])
 
-  // The date alone decides which section a show belongs to, so a concert moves
-  // itself to the history section the day after it happens.
-  const upcoming = useMemo(() => concerts.filter((c) => isUpcoming(c)), [concerts])
-  const past = useMemo(() => concerts.filter((c) => !isUpcoming(c)), [concerts])
-  const pastMatching = useMemo(() => past.filter((c) => matchesQuery(c, query)), [past, query])
-  const openConcert = detail ? concerts.find((c) => c.id === detail) : null
+  // The date alone decides whether an event is upcoming or history, so it moves
+  // itself the day after it happens. The category is an independent filter.
+  const upcoming = useMemo(() => events.filter((e) => isUpcoming(e)), [events])
+  const past = useMemo(() => events.filter((e) => !isUpcoming(e)), [events])
+  const pastMatching = useMemo(() => past.filter((e) => matchesQuery(e, query)), [past, query])
+  const upcomingOfKind = useMemo(() => upcoming.filter((e) => e.kind === kind), [upcoming, kind])
+  const upcomingCounts = useMemo(() => {
+    const counts = Object.fromEntries(KINDS.map((k) => [k, 0]))
+    for (const event of upcoming) counts[event.kind] = (counts[event.kind] || 0) + 1
+    return counts
+  }, [upcoming])
+  const openEvent = detail ? events.find((e) => e.id === detail) : null
 
-  async function saveConcert(concert) {
-    const storedPhoto = await storePhoto(concert.id, concert.photo)
-    const saved = storedPhoto ? concert : { ...concert, photo: '' }
-    setConcerts((list) => {
-      const index = list.findIndex((c) => c.id === saved.id)
+  async function saveEvent(event) {
+    const storedPhoto = await storePhoto(event.id, event.photo)
+    const saved = storedPhoto ? event : { ...event, photo: '' }
+    setEvents((list) => {
+      const index = list.findIndex((e) => e.id === saved.id)
       if (index === -1) return [...list, saved]
       const next = [...list]
       next[index] = saved
@@ -80,31 +94,33 @@ export default function App() {
     })
     setEditing(null)
     setDetail(saved.id)
+    // Follow the user to wherever the event they just saved actually lives.
+    if (section === 'events') setKind(saved.kind)
     if (!storedPhoto) setToast(t('photoNotSaved'))
   }
 
-  function deleteConcert(id) {
+  function deleteEvent(id) {
     removePhoto(id)
-    setConcerts((list) => list.filter((c) => c.id !== id))
+    setEvents((list) => list.filter((e) => e.id !== id))
     setDetail(null)
   }
 
   // Merge keeps existing records and adds the ones this device does not have.
-  async function importConcerts(imported, mode) {
-    const incoming = imported.map((c) => normalizeConcert(c))
-    const known = new Set(concerts.map((c) => c.id))
-    const fresh = mode === 'replace' ? incoming : incoming.filter((c) => !known.has(c.id))
+  async function importEvents(imported, mode) {
+    const incoming = imported.map((e) => normalizeEvent(e))
+    const known = new Set(events.map((e) => e.id))
+    const fresh = mode === 'replace' ? incoming : incoming.filter((e) => !known.has(e.id))
 
-    for (const concert of fresh) {
-      if (concert.photo) await storePhoto(concert.id, concert.photo)
+    for (const event of fresh) {
+      if (event.photo) await storePhoto(event.id, event.photo)
     }
     if (mode === 'replace') {
-      for (const concert of concerts) {
-        if (!incoming.some((c) => c.id === concert.id)) removePhoto(concert.id)
+      for (const event of events) {
+        if (!incoming.some((e) => e.id === event.id)) removePhoto(event.id)
       }
-      setConcerts(fresh)
+      setEvents(fresh)
     } else {
-      setConcerts((list) => [...list, ...fresh])
+      setEvents((list) => [...list, ...fresh])
     }
     return fresh.length
   }
@@ -121,19 +137,27 @@ export default function App() {
 
       <main className="app__main">
         {section === 'home' && (
-          <HomeView concerts={concerts} lang={lang} t={t} onOpen={(c) => setDetail(c.id)} />
+          <HomeView events={events} lang={lang} t={t} onOpen={(e) => setDetail(e.id)} />
         )}
         {section === 'events' && (
-          <EventsView concerts={upcoming} lang={lang} t={t} onOpen={(c) => setDetail(c.id)} />
+          <EventsView
+            events={upcomingOfKind}
+            kind={kind}
+            onKind={setKind}
+            counts={upcomingCounts}
+            lang={lang}
+            t={t}
+            onOpen={(e) => setDetail(e.id)}
+          />
         )}
         {section === 'history' && (
           <HistoryView
-            concerts={pastMatching}
-            allConcerts={concerts}
+            events={pastMatching}
+            allEvents={events}
             lang={lang}
             t={t}
-            onOpen={(c) => setDetail(c.id)}
-            onImport={importConcerts}
+            onOpen={(e) => setDetail(e.id)}
+            onImport={importEvents}
             onToast={setToast}
             query={query}
             onQuery={setQuery}
@@ -143,25 +167,27 @@ export default function App() {
       </main>
 
       {editing && (
-        <ConcertForm
-          concert={editing.id ? editing : null}
+        <EventForm
+          event={editing.id ? editing : null}
+          // Adding from the Events screen defaults to the category on show.
+          defaultKind={section === 'events' ? kind : DEFAULT_KIND}
           t={t}
-          onSave={saveConcert}
+          onSave={saveEvent}
           onError={setToast}
           onClose={() => setEditing(null)}
         />
       )}
 
-      {openConcert && !editing && (
-        <ConcertDetail
-          concert={openConcert}
+      {openEvent && !editing && (
+        <EventDetail
+          event={openEvent}
           lang={lang}
           t={t}
-          onEdit={(c) => {
+          onEdit={(e) => {
             setDetail(null)
-            setEditing(c)
+            setEditing(e)
           }}
-          onDelete={deleteConcert}
+          onDelete={deleteEvent}
           onClose={() => setDetail(null)}
         />
       )}
@@ -169,13 +195,13 @@ export default function App() {
       {settingsOpen && (
         <Modal title={t('tabSettings')} onClose={() => setSettingsOpen(false)} closeLabel={t('close')}>
           <SettingsView
-            concerts={concerts}
+            events={events}
             t={t}
             lang={lang}
             onLang={() => setLang(lang === 'es' ? 'en' : 'es')}
             isDark={isDark}
             onTheme={() => setIsDark((v) => !v)}
-            onImport={importConcerts}
+            onImport={importEvents}
             onToast={setToast}
           />
         </Modal>
