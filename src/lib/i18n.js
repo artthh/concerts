@@ -64,6 +64,7 @@ const STRINGS = {
 
   emoji: 'Emoji',
   emojiHint: 'Shown next to the name on the cards.',
+  venueReuseHint: 'Tap one you have used before.',
   photo: 'Photo',
   photoHint: 'Cropped automatically for the cards.',
   addPhoto: 'Choose photo',

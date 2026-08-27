@@ -1,5 +1,12 @@
-import { useState } from 'react'
-import { CURRENCIES, KINDS, KINDS_WITH_EXTRAS, emptyEvent, normalizeEvent } from '../lib/events.js'
+import { useMemo, useState } from 'react'
+import {
+  CURRENCIES,
+  KINDS,
+  KINDS_WITH_EXTRAS,
+  emptyEvent,
+  normalizeEvent,
+  venueSuggestions,
+} from '../lib/events.js'
 import { t } from '../lib/i18n.js'
 import Modal from './Modal.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
@@ -7,7 +14,7 @@ import PhotoPicker from './PhotoPicker.jsx'
 // Lists live as arrays in the record but are edited as free text.
 const toText = (list) => (Array.isArray(list) ? list.join('\n') : String(list || ''))
 
-export default function EventForm({ event, defaultKind, onSave, onClose, onError }) {
+export default function EventForm({ event, defaultKind, events, onSave, onClose, onError }) {
   const [draft, setDraft] = useState(() => ({
     ...emptyEvent(event?.kind || defaultKind),
     ...(event || {}),
@@ -20,6 +27,8 @@ export default function EventForm({ event, defaultKind, onSave, onClose, onError
   // name, photo, date and venue, so there is nothing to fold away for them.
   const [showExtras, setShowExtras] = useState(false)
   const hasExtras = KINDS_WITH_EXTRAS.has(draft.kind)
+  // Places already used, so a regular haunt is one tap instead of retyping it.
+  const venues = useMemo(() => venueSuggestions(events, draft.kind), [events, draft.kind])
 
   const set = (key) => (event_) => setDraft((d) => ({ ...d, [key]: event_.target.value }))
 
@@ -85,6 +94,7 @@ export default function EventForm({ event, defaultKind, onSave, onClose, onError
           <span className="field__label">{t(`photoLabel_${draft.kind}`)}</span>
           <PhotoPicker
             value={draft.photo}
+            placeholder={t(`kindIcon_${draft.kind}`)}
             onChange={(photo) => setDraft((d) => ({ ...d, photo }))}
             onError={onError}
           />
@@ -119,7 +129,40 @@ export default function EventForm({ event, defaultKind, onSave, onClose, onError
           <label className="field__label" htmlFor="venue">
             {t(`venueLabel_${draft.kind}`)}
           </label>
-          <input id="venue" className="input" value={draft.venue} onChange={set('venue')} />
+          <input
+            id="venue"
+            className="input"
+            list="venue-options"
+            value={draft.venue}
+            onChange={set('venue')}
+          />
+          {/* The datalist helps while typing; the chips are for picking with a
+              thumb, which is how this actually gets used on a phone. */}
+          <datalist id="venue-options">
+            {venues.map((venue) => (
+              <option key={venue} value={venue} />
+            ))}
+          </datalist>
+          {venues.length > 0 && (
+            <>
+              <div className="venue-chips">
+                {venues.map((venue) => (
+                  <button
+                    key={venue}
+                    type="button"
+                    className="chip-button"
+                    aria-pressed={draft.venue === venue}
+                    onClick={() =>
+                      setDraft((d) => ({ ...d, venue: d.venue === venue ? '' : venue }))
+                    }
+                  >
+                    {venue}
+                  </button>
+                ))}
+              </div>
+              <div className="field__hint">{t('venueReuseHint')}</div>
+            </>
+          )}
         </div>
 
         {hasExtras && (

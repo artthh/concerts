@@ -65,7 +65,6 @@ function Tile({ event, onOpen }) {
           {event.title}
           {event.emoji && <span> {event.emoji}</span>}
         </span>
-        <span className="tile__meta">{event.venue || formatEventDate(event.date)}</span>
       </span>
     </button>
   )

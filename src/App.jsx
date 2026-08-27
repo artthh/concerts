@@ -158,6 +158,7 @@ export default function App() {
           event={editing.id ? editing : null}
           // Adding from the Events screen defaults to the category on show.
           defaultKind={section === 'events' ? kind : DEFAULT_KIND}
+          events={events}
           onSave={saveEvent}
           onError={setToast}
           onClose={() => setEditing(null)}

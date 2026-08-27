@@ -4,7 +4,7 @@ import { t } from '../lib/i18n.js'
 
 // Crops the picked file straight away so the preview is exactly what gets
 // stored and shown on the cards.
-export default function PhotoPicker({ value, onChange, onError }) {
+export default function PhotoPicker({ value, placeholder = '🎤', onChange, onError }) {
   const input = useRef(null)
   const [busy, setBusy] = useState(false)
 
@@ -30,7 +30,7 @@ export default function PhotoPicker({ value, onChange, onError }) {
         onClick={() => input.current?.click()}
         aria-label={value ? t('changePhoto') : t('addPhoto')}
       >
-        {value ? <img src={value} alt="" /> : <span aria-hidden="true">🎤</span>}
+        {value ? <img src={value} alt="" /> : <span aria-hidden="true">{placeholder}</span>}
         {busy && <span className="photo-picker__busy">…</span>}
       </button>
       <div className="photo-picker__actions">

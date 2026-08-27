@@ -21,6 +21,11 @@ Concerts carry the long tail of optional fields (tour, city, price, seat,
 openers, company, rating, setlist, notes, ticket link). Movies and shows are
 just name, emoji, photo, date and venue, which is all they are worth typing.
 
+The venue field suggests places already used, as tappable chips and as a
+`datalist` for typing. Venues used for the category being added rank first — a
+cinema is a useful suggestion for a movie and noise for a concert — then by how
+often, then by how recently.
+
 ## The three sections
 
 Navigation is the pill row at the top; `+` adds an event and the 🎤 opens
@@ -41,8 +46,11 @@ reinstalling, so a restore belongs where the records are. A search field
 appears once there are eight or more.
 
 **Home** is the overview: the very next event as a full-width hero, the ones
-after it as a grid of tiles, then the running numbers. All three categories mix
-here, ordered purely by date — Home answers "what is next", not "what kind".
+after it as a grid of small tiles three across, then the running numbers. All
+three categories mix here, ordered purely by date — Home answers "what is
+next", not "what kind". The tiles are deliberately tight: at that size they
+carry the countdown and the title only, since the point is seeing a lot of the
+calendar at once rather than every detail.
 
 Nothing is moved by hand — the date is the only thing that decides which
 section an event is in, so it leaves Events on its own the day after it

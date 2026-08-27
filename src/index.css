@@ -417,10 +417,13 @@ textarea {
   color: var(--gold);
 }
 
+/* Three across rather than two, so a screenful shows roughly twice as many.
+   At this size there is no room for a third line, so the tiles carry the
+   countdown and the title only -- the rest is a tap away. */
 .tile-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .tile {
@@ -431,7 +434,7 @@ textarea {
   overflow: hidden;
   text-align: left;
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 14px;
   background: var(--card);
 }
 
@@ -447,7 +450,7 @@ textarea {
 .tile__photo--empty {
   display: grid;
   place-items: center;
-  font-size: 38px;
+  font-size: 26px;
   background: linear-gradient(150deg, var(--card-2), var(--card-edge));
 }
 
@@ -469,31 +472,31 @@ textarea {
   bottom: 0;
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 8px 9px;
   color: #fff;
 }
 
 .tile__count {
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tile__count-n {
-  font-size: 24px;
+  font-size: 19px;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.6px;
   font-variant-numeric: tabular-nums;
 }
 
 .tile__count-n--word {
-  font-size: 17px;
-  letter-spacing: -0.3px;
+  font-size: 13px;
+  letter-spacing: -0.2px;
 }
 
 .tile__count-label {
-  font-size: 12px;
+  font-size: 9px;
   font-weight: 800;
   line-height: 1;
   text-transform: uppercase;
@@ -501,18 +504,11 @@ textarea {
 }
 
 .tile__title {
-  margin-top: 4px;
-  font-size: 15px;
+  margin-top: 3px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: -0.2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tile__meta {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: -0.1px;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1016,6 +1012,26 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.venue-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.venue-chips .chip-button {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.venue-chips .chip-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .form-extras {

@@ -150,6 +150,32 @@ export function matchesQuery(event, query) {
   return haystack.includes(q)
 }
 
+// Venues you have already typed, so they can be picked instead of retyped.
+// Ones used for this category come first -- a cinema is a useful suggestion for
+// a movie and noise for a concert -- then by how often, then by how recently.
+export function venueSuggestions(events, kind, limit = 6) {
+  const seen = new Map()
+  for (const event of events) {
+    const venue = String(event.venue || '').trim()
+    if (!venue) continue
+    const entry = seen.get(venue) || { venue, count: 0, latest: '', sameKind: false }
+    entry.count += 1
+    if (String(event.date || '') > entry.latest) entry.latest = String(event.date || '')
+    if (event.kind === kind) entry.sameKind = true
+    seen.set(venue, entry)
+  }
+  return [...seen.values()]
+    .sort(
+      (a, b) =>
+        Number(b.sameKind) - Number(a.sameKind) ||
+        b.count - a.count ||
+        b.latest.localeCompare(a.latest) ||
+        a.venue.localeCompare(b.venue),
+    )
+    .slice(0, limit)
+    .map((entry) => entry.venue)
+}
+
 export function buildStats(events, today = todayISO()) {
   const past = events.filter((e) => !isUpcoming(e, today))
   const upcoming = events.filter((e) => isUpcoming(e, today))
