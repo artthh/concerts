@@ -30,7 +30,8 @@ export default function App() {
     withPhotos(load(KEYS.concerts, []).map((e) => normalizeEvent(e))),
   )
   const [isDark, setIsDark] = useState(() => load(KEYS.theme, 'dark') !== 'light')
-  const [section, setSection] = useState('events')
+  // Home is the landing screen: it answers "what is next" across categories.
+  const [section, setSection] = useState('home')
   const [kind, setKind] = useState(() => {
     const stored = load(KEYS.kind, DEFAULT_KIND)
     return KINDS.includes(stored) ? stored : DEFAULT_KIND
