@@ -6,7 +6,8 @@ iOS/Android home screen and run full-screen, like the `mi-gym` app.
 
 - **Stack:** Vite + React 19, no backend, no CSS framework.
 - **Storage:** `localStorage` on the device, with JSON backup export/import.
-- **Photos:** picked from the phone, cropped and downscaled in the browser.
+- **Photos:** picked from the phone, cropped and downscaled in the browser —
+  event photos landscape, the profile photo square.
 - **Language:** English only.
 - **Theme:** dark by default (the design is dark-first); light is available in
   settings.
@@ -28,8 +29,10 @@ often, then by how recently.
 
 ## The three sections
 
-Navigation is the pill row at the top; `+` adds an event and the 🎤 opens
-settings.
+Each screen's header is its title on the left with settings and the profile
+photo on the right. Navigation is a floating translucent bar centred at the
+bottom, with the content scrolling visibly underneath it, and `+` floats just
+above it.
 
 **Events** is the main list: upcoming events, soonest first. The page title
 *is* the category switcher — tapping "Concerts" opens Concerts / Movies /
@@ -128,13 +131,15 @@ src/
     photos.js               crop/downscale + per-event photo storage
     i18n.js                 every UI string, date and money formatting
   components/
-    TopNav.jsx              mic, section pills, add button
+    PageHeader.jsx          title, settings and profile photo on one line
+    BottomNav.jsx           floating translucent section bar
+    Icons.jsx               inline line icons
     HomeView.jsx            hero for the next event, grid, then the numbers
     EventsView.jsx          upcoming events + the category switcher
     HistoryView.jsx         past events grouped by year
     EventCard.jsx           one card: photo on one edge, countdown on the other
     StatsView.jsx           totals, spend, per-year and top-N bars
-    SettingsView.jsx        theme, language, backup
+    SettingsView.jsx        profile photo, theme, backup
     BackupPanel.jsx         export/import, shared by History and Settings
     EventForm.jsx           add/edit sheet, fields depend on the category
     PhotoPicker.jsx         photo field with crop preview

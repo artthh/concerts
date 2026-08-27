@@ -17,6 +17,10 @@
   --accent-soft: #ede4fe;
   --gold: #9a7031;
   --danger: #dc2626;
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(23, 18, 31, 0.08);
+  --glass-text: #17121f;
+  --glass-dim: #7d768c;
   --shadow: 0 1px 2px rgba(23, 18, 31, 0.06), 0 8px 24px rgba(23, 18, 31, 0.06);
   --radius: 18px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -39,6 +43,10 @@
   --accent-soft: #6d28d94d;
   --gold: #d0a973;
   --danger: #f87171;
+  --glass-bg: rgba(120, 120, 135, 0.22);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-text: #ffffff;
+  --glass-dim: rgba(255, 255, 255, 0.62);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 
@@ -97,96 +105,136 @@ textarea {
 
 .app__main {
   flex: 1;
-  padding: 0 16px calc(40px + var(--safe-bottom));
+  padding: 0 16px calc(112px + var(--safe-bottom));
 }
 
 .page-title {
   font-size: 34px;
   font-weight: 800;
   letter-spacing: -0.8px;
-  margin: 14px 0 18px;
+  margin: 0;
 }
 
-/* Top navigation --------------------------------------------------------- */
+/* Page header: title left, settings and profile right ------------------- */
 
-.topnav {
-  position: sticky;
-  top: 0;
-  z-index: 20;
+.page-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: calc(10px + var(--safe-top)) 14px 10px;
-  background: color-mix(in srgb, var(--bg) 90%, transparent);
-  backdrop-filter: blur(14px);
+  gap: 12px;
+  padding-top: calc(6px + var(--safe-top));
 }
 
-.topnav__mark {
-  flex: none;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  font-size: 22px;
-  line-height: 1;
-}
-
-.topnav__pills {
-  display: flex;
-  gap: 8px;
+.page-header__title {
   flex: 1;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
-.topnav__pills::-webkit-scrollbar {
-  display: none;
-}
-
-.pill {
-  display: inline-flex;
+.page-header__actions {
+  flex: none;
+  display: flex;
   align-items: center;
-  gap: 7px;
-  flex: none;
-  height: 34px;
-  padding: 0 13px;
+  gap: 10px;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--accent);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card-2);
+  color: var(--text-3);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Bottom navigation: floating, translucent, centred ---------------------- */
+
+.bottomnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(12px + var(--safe-bottom));
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  /* Only the bar itself should catch taps, not the strip around it. */
+  pointer-events: none;
+}
+
+.bottomnav__bar {
+  pointer-events: auto;
+  display: flex;
+  gap: 2px;
+  padding: 7px 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: 26px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4);
+}
+
+.bottomnav__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 86px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--glass-dim);
+}
+
+.bottomnav__tab[aria-selected='true'] {
+  color: var(--glass-text);
+}
+
+.bottomnav__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+/* Add: the mockup's bar has no room for it, so it floats above the bar. */
+.fab {
+  position: fixed;
+  right: 18px;
+  bottom: calc(92px + var(--safe-bottom));
+  z-index: 31;
+  width: 52px;
+  height: 52px;
   border: 0;
   border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--text);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.2px;
-}
-
-.pill__bar {
-  width: 2px;
-  height: 15px;
-  border-radius: 2px;
-  background: var(--accent);
-}
-
-.pill[aria-current='page'] {
-  background: color-mix(in srgb, var(--accent) 55%, transparent);
-}
-
-.pill[aria-current='page'] .pill__bar {
-  background: #fff;
-}
-
-.topnav__add {
-  flex: none;
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 70%, transparent);
   color: #fff;
-  font-size: 20px;
+  font-size: 27px;
   font-weight: 400;
   line-height: 1;
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  box-shadow: 0 10px 26px rgba(124, 58, 237, 0.45);
 }
 
 /* Sections --------------------------------------------------------------- */
@@ -197,6 +245,12 @@ textarea {
 
 .section--tight {
   margin-top: 0;
+}
+
+.page-header + .section__title,
+.page-header + .section,
+.page-header + .backup {
+  margin-top: 18px;
 }
 
 .section__title {
@@ -236,6 +290,11 @@ textarea {
 
 .category {
   position: relative;
+}
+
+/* The switcher sits in the header slot, so it must not add its own margin. */
+.category .page-title {
+  margin: 0;
 }
 
 .category__button {
@@ -989,6 +1048,12 @@ textarea {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.photo-picker--round .photo-picker__preview {
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
 }
 
 .photo-picker__preview--empty {

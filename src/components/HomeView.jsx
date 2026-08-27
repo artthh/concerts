@@ -1,5 +1,6 @@
 import { daysUntil, isUpcoming, sortByDate } from '../lib/events.js'
 import { formatEventDate, t } from '../lib/i18n.js'
+import PageHeader from './PageHeader.jsx'
 import StatsView from './StatsView.jsx'
 
 // Shared by the hero and the tiles: the number is the point, so today and
@@ -72,13 +73,15 @@ function Tile({ event, onOpen }) {
 
 // The overview: the very next event large, then the ones after it as a grid,
 // then the running numbers.
-export default function HomeView({ events, onOpen }) {
+export default function HomeView({ events, profilePhoto, onSettings, onOpen }) {
   const upcoming = sortByDate(events.filter((e) => isUpcoming(e)), 'asc')
   const [next, ...rest] = upcoming
 
   return (
     <>
-      <h1 className="page-title">{t('navHome')}</h1>
+      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings}>
+        <h1 className="page-title">{t('navHome')}</h1>
+      </PageHeader>
 
       {next ? (
         <>

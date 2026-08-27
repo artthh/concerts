@@ -11,6 +11,10 @@ const PREFIX = 'concerts.photo.'
 export const PHOTO_WIDTH = 640
 export const PHOTO_HEIGHT = 420
 
+// The avatar is square and small, and stored under its own reserved id.
+export const PROFILE_ID = 'profile'
+export const PROFILE_SIZE = 220
+
 // Tried in order when storage is tight.
 const QUALITIES = [0.78, 0.6, 0.45]
 
@@ -31,13 +35,14 @@ export function removePhoto(id) {
 }
 
 // Returns true when the photo landed, false when every quality blew the quota.
-export async function storePhoto(id, dataUrl) {
+export async function storePhoto(id, dataUrl, options = {}) {
   if (!dataUrl) {
     removePhoto(id)
     return true
   }
   for (const quality of [null, ...QUALITIES.slice(1)]) {
-    const candidate = quality === null ? dataUrl : await preparePhoto(dataUrl, { quality })
+    const candidate =
+      quality === null ? dataUrl : await preparePhoto(dataUrl, { ...options, quality })
     try {
       localStorage.setItem(PREFIX + id, candidate)
       return true
@@ -61,16 +66,19 @@ export function listPhotos(ids) {
 // Center-crops to the card aspect ratio the same way `object-fit: cover` would,
 // then re-encodes as JPEG. Accepts a File from the picker or an existing
 // data URL (used to shrink a photo that did not fit).
-export async function preparePhoto(source, { quality = QUALITIES[0] } = {}) {
+export async function preparePhoto(
+  source,
+  { quality = QUALITIES[0], width = PHOTO_WIDTH, height = PHOTO_HEIGHT } = {},
+) {
   const image = await loadImage(source)
   const canvas = document.createElement('canvas')
-  canvas.width = PHOTO_WIDTH
-  canvas.height = PHOTO_HEIGHT
+  canvas.width = width
+  canvas.height = height
   const context = canvas.getContext('2d')
-  const scale = Math.max(PHOTO_WIDTH / image.width, PHOTO_HEIGHT / image.height)
-  const width = image.width * scale
-  const height = image.height * scale
-  context.drawImage(image, (PHOTO_WIDTH - width) / 2, (PHOTO_HEIGHT - height) / 2, width, height)
+  const scale = Math.max(width / image.width, height / image.height)
+  const drawWidth = image.width * scale
+  const drawHeight = image.height * scale
+  context.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight)
   return canvas.toDataURL('image/jpeg', quality)
 }
 

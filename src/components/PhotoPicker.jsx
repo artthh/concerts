@@ -4,7 +4,15 @@ import { t } from '../lib/i18n.js'
 
 // Crops the picked file straight away so the preview is exactly what gets
 // stored and shown on the cards.
-export default function PhotoPicker({ value, placeholder = '🎤', onChange, onError }) {
+export default function PhotoPicker({
+  value,
+  placeholder = '🎤',
+  width,
+  height,
+  round = false,
+  onChange,
+  onError,
+}) {
   const input = useRef(null)
   const [busy, setBusy] = useState(false)
 
@@ -14,7 +22,7 @@ export default function PhotoPicker({ value, placeholder = '🎤', onChange, onE
     if (!file) return
     setBusy(true)
     try {
-      onChange(await preparePhoto(file))
+      onChange(await preparePhoto(file, width && height ? { width, height } : undefined))
     } catch {
       onError(t('photoFailed'))
     } finally {
@@ -23,7 +31,7 @@ export default function PhotoPicker({ value, placeholder = '🎤', onChange, onE
   }
 
   return (
-    <div className="photo-picker">
+    <div className={round ? 'photo-picker photo-picker--round' : 'photo-picker'}>
       <button
         type="button"
         className={value ? 'photo-picker__preview' : 'photo-picker__preview photo-picker__preview--empty'}

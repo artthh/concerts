@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import TopNav from './components/TopNav.jsx'
+import BottomNav from './components/BottomNav.jsx'
 import HomeView from './components/HomeView.jsx'
 import EventsView from './components/EventsView.jsx'
 import HistoryView from './components/HistoryView.jsx'
@@ -8,7 +8,7 @@ import EventForm from './components/EventForm.jsx'
 import EventDetail from './components/EventDetail.jsx'
 import Modal from './components/Modal.jsx'
 import { KEYS, load, save } from './lib/storage.js'
-import { getPhoto, removePhoto, storePhoto } from './lib/photos.js'
+import { PROFILE_ID, PROFILE_SIZE, getPhoto, removePhoto, storePhoto } from './lib/photos.js'
 import { DEFAULT_KIND, KINDS, isUpcoming, matchesQuery, normalizeEvent } from './lib/events.js'
 import { t } from './lib/i18n.js'
 
@@ -39,6 +39,7 @@ export default function App() {
   const [editing, setEditing] = useState(null) // event draft in the form sheet
   const [detail, setDetail] = useState(null) // event id open in the detail sheet
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [profilePhoto, setProfilePhoto] = useState(() => getPhoto(PROFILE_ID))
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -91,6 +92,15 @@ export default function App() {
     if (!storedPhoto) setToast(t('photoNotSaved'))
   }
 
+  async function saveProfilePhoto(photo) {
+    const stored = await storePhoto(PROFILE_ID, photo, {
+      width: PROFILE_SIZE,
+      height: PROFILE_SIZE,
+    })
+    setProfilePhoto(stored ? photo : '')
+    if (!stored) setToast(t('photoNotSaved'))
+  }
+
   function deleteEvent(id) {
     removePhoto(id)
     setEvents((list) => list.filter((e) => e.id !== id))
@@ -119,16 +129,14 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopNav
-        section={section}
-        onSection={setSection}
-        onAdd={() => setEditing({})}
-        onSettings={() => setSettingsOpen(true)}
-      />
-
       <main className="app__main">
         {section === 'home' && (
-          <HomeView events={events} onOpen={(e) => setDetail(e.id)} />
+          <HomeView
+            events={events}
+            profilePhoto={profilePhoto}
+            onSettings={() => setSettingsOpen(true)}
+            onOpen={(e) => setDetail(e.id)}
+          />
         )}
         {section === 'events' && (
           <EventsView
@@ -136,6 +144,8 @@ export default function App() {
             kind={kind}
             onKind={setKind}
             counts={upcomingCounts}
+            profilePhoto={profilePhoto}
+            onSettings={() => setSettingsOpen(true)}
             onOpen={(e) => setDetail(e.id)}
           />
         )}
@@ -143,6 +153,8 @@ export default function App() {
           <HistoryView
             events={pastMatching}
             allEvents={events}
+            profilePhoto={profilePhoto}
+            onSettings={() => setSettingsOpen(true)}
             onOpen={(e) => setDetail(e.id)}
             onImport={importEvents}
             onToast={setToast}
@@ -152,6 +164,13 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* The mockup's bottom bar has no add button, so adding floats above it. */}
+      <button type="button" className="fab" onClick={() => setEditing({})} aria-label={t('add')}>
+        +
+      </button>
+
+      <BottomNav section={section} onSection={setSection} />
 
       {editing && (
         <EventForm
@@ -183,6 +202,8 @@ export default function App() {
             events={events}
             isDark={isDark}
             onTheme={() => setIsDark((v) => !v)}
+            profilePhoto={profilePhoto}
+            onProfilePhoto={saveProfilePhoto}
             onImport={importEvents}
             onToast={setToast}
           />

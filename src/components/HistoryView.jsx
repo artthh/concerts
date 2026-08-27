@@ -1,11 +1,14 @@
 import { sortByDate } from '../lib/events.js'
 import { t } from '../lib/i18n.js'
 import BackupPanel from './BackupPanel.jsx'
+import PageHeader from './PageHeader.jsx'
 import EventCard from './EventCard.jsx'
 
 export default function HistoryView({
   events,
   allEvents,
+  profilePhoto,
+  onSettings,
   onOpen,
   onImport,
   onToast,
@@ -29,7 +32,9 @@ export default function HistoryView({
 
   return (
     <>
-      <h1 className="page-title">{t('navHistory')}</h1>
+      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings}>
+        <h1 className="page-title">{t('navHistory')}</h1>
+      </PageHeader>
 
       {/* A restore belongs where the records are: this is the screen you open
           after reinstalling, when Events is empty and nothing looks familiar.

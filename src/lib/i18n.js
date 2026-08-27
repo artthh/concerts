@@ -35,6 +35,7 @@ const STRINGS = {
   thenComes: 'Then comes',
   countdown: 'Countdown',
 
+  profile: 'Profile',
   category: 'Category',
   byCategory: 'By category',
   kind_concert: 'Concert',

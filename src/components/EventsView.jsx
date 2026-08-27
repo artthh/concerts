@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { KINDS, sortByDate } from '../lib/events.js'
 import { t } from '../lib/i18n.js'
 import EventCard from './EventCard.jsx'
+import PageHeader from './PageHeader.jsx'
 
 // The page title doubles as the category switcher: tapping "Concerts" opens
 // the three categories right where the heading is.
-export default function EventsView({ events, kind, onKind, counts, onOpen }) {
+export default function EventsView({ events, kind, onKind, counts, profilePhoto, onSettings, onOpen }) {
   const [open, setOpen] = useState(false)
   const sorted = sortByDate(events, 'asc')
 
@@ -16,6 +17,7 @@ export default function EventsView({ events, kind, onKind, counts, onOpen }) {
 
   return (
     <>
+      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings}>
       <div className="category">
         <button
           type="button"
@@ -50,6 +52,7 @@ export default function EventsView({ events, kind, onKind, counts, onOpen }) {
           </div>
         )}
       </div>
+      </PageHeader>
 
       {sorted.length === 0 ? (
         <p className="empty">{t(`emptyKind_${kind}`)}</p>
