@@ -244,7 +244,7 @@ textarea {
 /* Sections --------------------------------------------------------------- */
 
 .section {
-  margin-top: 16px;
+  margin-top: 22px;
 }
 
 .section--tight {
@@ -253,8 +253,10 @@ textarea {
 
 .page-header + .section__title,
 .page-header + .section,
-.page-header + .backup {
-  margin-top: 12px;
+.page-header + .backup,
+.page-header + .hero,
+.page-header + .empty {
+  margin-top: 16px;
 }
 
 .section__title {

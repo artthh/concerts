@@ -79,14 +79,11 @@ export default function HomeView({ events, profilePhoto, onSettings, onOpen }) {
   return (
     <>
       <PageHeader profilePhoto={profilePhoto} onSettings={onSettings}>
-        <h1 className="page-title">{t('navHome')}</h1>
+        <h1 className="page-title">{t('nextUp')}</h1>
       </PageHeader>
 
       {next ? (
-        <>
-          <h2 className="section__title">{t('nextUp')}</h2>
-          <Hero event={next} onOpen={onOpen} />
-        </>
+        <Hero event={next} onOpen={onOpen} />
       ) : (
         <p className="empty">{t('emptyHome')}</p>
       )}
