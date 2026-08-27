@@ -255,7 +255,8 @@ textarea {
 .page-header + .section,
 .page-header + .backup,
 .page-header + .hero,
-.page-header + .empty {
+.page-header + .empty,
+.page-header + .show-list {
   margin-top: 16px;
 }
 
