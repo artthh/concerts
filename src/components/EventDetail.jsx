@@ -1,5 +1,5 @@
 import { KINDS_WITH_EXTRAS, daysUntil, isUpcoming } from '../lib/events.js'
-import { formatDate, formatMoney, relativeDays } from '../lib/i18n.js'
+import { formatDate, formatMoney, relativeDays, t } from '../lib/i18n.js'
 import Modal from './Modal.jsx'
 import Stars from './Stars.jsx'
 
@@ -13,7 +13,7 @@ function Row({ label, children }) {
   )
 }
 
-export default function EventDetail({ event, lang, t, onEdit, onDelete, onClose }) {
+export default function EventDetail({ event, onEdit, onDelete, onClose }) {
   const hasExtras = KINDS_WITH_EXTRAS.has(event.kind)
 
   return (
@@ -22,11 +22,11 @@ export default function EventDetail({ event, lang, t, onEdit, onDelete, onClose 
       <div className="detail__meta">
         <Row label={t('category')}>{t(`kind_${event.kind}`)}</Row>
         <Row label={t('date')}>
-          {formatDate(event.date, lang)}
+          {formatDate(event.date)}
           {event.time ? ` · ${event.time}` : ''}
         </Row>
         <Row label={isUpcoming(event) ? t('countdown') : t('daysSince')}>
-          {relativeDays(daysUntil(event), t)}
+          {relativeDays(daysUntil(event))}
         </Row>
         <Row label={t(`venueLabel_${event.kind}`)}>{event.venue}</Row>
         {hasExtras && (
@@ -34,7 +34,7 @@ export default function EventDetail({ event, lang, t, onEdit, onDelete, onClose 
             <Row label={t('tour')}>{event.tour}</Row>
             <Row label={t('city')}>{[event.city, event.country].filter(Boolean).join(', ')}</Row>
             <Row label={t('seat')}>{event.seat}</Row>
-            <Row label={t('price')}>{formatMoney(event.price, event.currency, lang)}</Row>
+            <Row label={t('price')}>{formatMoney(event.price, event.currency)}</Row>
             <Row label={t('openers')}>{event.openers.join(', ')}</Row>
             <Row label={t('company')}>{event.company.join(', ')}</Row>
           </>

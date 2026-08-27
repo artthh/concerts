@@ -10,7 +10,7 @@ import Modal from './components/Modal.jsx'
 import { KEYS, load, save } from './lib/storage.js'
 import { getPhoto, removePhoto, storePhoto } from './lib/photos.js'
 import { DEFAULT_KIND, KINDS, isUpcoming, matchesQuery, normalizeEvent } from './lib/events.js'
-import { translator } from './lib/i18n.js'
+import { t } from './lib/i18n.js'
 
 // Photos are kept in their own storage keys, so the events blob written on
 // every edit stays small. In memory each record carries its own photo.
@@ -29,7 +29,6 @@ export default function App() {
   const [events, setEvents] = useState(() =>
     withPhotos(load(KEYS.concerts, []).map((e) => normalizeEvent(e))),
   )
-  const [lang, setLang] = useState(() => load(KEYS.lang, 'es'))
   const [isDark, setIsDark] = useState(() => load(KEYS.theme, 'dark') !== 'light')
   const [section, setSection] = useState('events')
   const [kind, setKind] = useState(() => {
@@ -42,16 +41,9 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [toast, setToast] = useState('')
 
-  const t = useMemo(() => translator(lang), [lang])
-
   useEffect(() => {
     save(KEYS.concerts, withoutPhotos(events))
   }, [events])
-
-  useEffect(() => {
-    save(KEYS.lang, lang)
-    document.documentElement.lang = lang
-  }, [lang])
 
   useEffect(() => {
     save(KEYS.kind, kind)
@@ -132,12 +124,11 @@ export default function App() {
         onSection={setSection}
         onAdd={() => setEditing({})}
         onSettings={() => setSettingsOpen(true)}
-        t={t}
       />
 
       <main className="app__main">
         {section === 'home' && (
-          <HomeView events={events} lang={lang} t={t} onOpen={(e) => setDetail(e.id)} />
+          <HomeView events={events} onOpen={(e) => setDetail(e.id)} />
         )}
         {section === 'events' && (
           <EventsView
@@ -145,8 +136,6 @@ export default function App() {
             kind={kind}
             onKind={setKind}
             counts={upcomingCounts}
-            lang={lang}
-            t={t}
             onOpen={(e) => setDetail(e.id)}
           />
         )}
@@ -154,8 +143,6 @@ export default function App() {
           <HistoryView
             events={pastMatching}
             allEvents={events}
-            lang={lang}
-            t={t}
             onOpen={(e) => setDetail(e.id)}
             onImport={importEvents}
             onToast={setToast}
@@ -171,7 +158,6 @@ export default function App() {
           event={editing.id ? editing : null}
           // Adding from the Events screen defaults to the category on show.
           defaultKind={section === 'events' ? kind : DEFAULT_KIND}
-          t={t}
           onSave={saveEvent}
           onError={setToast}
           onClose={() => setEditing(null)}
@@ -181,8 +167,6 @@ export default function App() {
       {openEvent && !editing && (
         <EventDetail
           event={openEvent}
-          lang={lang}
-          t={t}
           onEdit={(e) => {
             setDetail(null)
             setEditing(e)
@@ -196,9 +180,6 @@ export default function App() {
         <Modal title={t('tabSettings')} onClose={() => setSettingsOpen(false)} closeLabel={t('close')}>
           <SettingsView
             events={events}
-            t={t}
-            lang={lang}
-            onLang={() => setLang(lang === 'es' ? 'en' : 'es')}
             isDark={isDark}
             onTheme={() => setIsDark((v) => !v)}
             onImport={importEvents}

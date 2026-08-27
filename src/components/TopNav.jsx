@@ -1,10 +1,12 @@
+import { t } from '../lib/i18n.js'
+
 const SECTIONS = [
   { id: 'home', label: 'navHome' },
   { id: 'events', label: 'navEvents' },
   { id: 'history', label: 'navHistory' },
 ]
 
-export default function TopNav({ section, onSection, onAdd, onSettings, t }) {
+export default function TopNav({ section, onSection, onAdd, onSettings }) {
   return (
     <header className="topnav">
       {/* The mic is also the way into settings — the design has no gear. */}

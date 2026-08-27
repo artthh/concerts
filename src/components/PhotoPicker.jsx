@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
 import { preparePhoto } from '../lib/photos.js'
+import { t } from '../lib/i18n.js'
 
 // Crops the picked file straight away so the preview is exactly what gets
 // stored and shown on the cards.
-export default function PhotoPicker({ value, t, onChange, onError }) {
+export default function PhotoPicker({ value, onChange, onError }) {
   const input = useRef(null)
   const [busy, setBusy] = useState(false)
 

@@ -1,12 +1,11 @@
 import { sortByDate } from '../lib/events.js'
+import { t } from '../lib/i18n.js'
 import BackupPanel from './BackupPanel.jsx'
 import EventCard from './EventCard.jsx'
 
 export default function HistoryView({
   events,
   allEvents,
-  lang,
-  t,
   onOpen,
   onImport,
   onToast,
@@ -35,7 +34,7 @@ export default function HistoryView({
       {/* A restore belongs where the records are: this is the screen you open
           after reinstalling, when Events is empty and nothing looks familiar.
           Export covers every category, not just the past events. */}
-      <BackupPanel events={allEvents} t={t} onImport={onImport} onToast={onToast} compact />
+      <BackupPanel events={allEvents} onImport={onImport} onToast={onToast} compact />
       <p className="backup__note">{t('backupNote')}</p>
 
       {searchable && (
@@ -62,8 +61,6 @@ export default function HistoryView({
                   key={event.id}
                   event={event}
                   side={position++ % 2 === 0 ? 'left' : 'right'}
-                  lang={lang}
-                  t={t}
                   onOpen={onOpen}
                 />
               ))}

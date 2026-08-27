@@ -1,12 +1,12 @@
 import { useRef } from 'react'
 import { exportBackup, readBackup } from '../lib/storage.js'
+import { t } from '../lib/i18n.js'
 
 // Export/import of the whole collection. Shared by History (compact, so a
 // restore is reachable right where the records are) and Settings (full width,
 // where the destructive replace also lives).
 export default function BackupPanel({
   events,
-  t,
   onImport,
   onToast,
   compact = false,

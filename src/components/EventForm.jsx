@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { CURRENCIES, KINDS, KINDS_WITH_EXTRAS, emptyEvent, normalizeEvent } from '../lib/events.js'
+import { t } from '../lib/i18n.js'
 import Modal from './Modal.jsx'
 import PhotoPicker from './PhotoPicker.jsx'
 
 // Lists live as arrays in the record but are edited as free text.
 const toText = (list) => (Array.isArray(list) ? list.join('\n') : String(list || ''))
 
-export default function EventForm({ event, defaultKind, t, onSave, onClose, onError }) {
+export default function EventForm({ event, defaultKind, onSave, onClose, onError }) {
   const [draft, setDraft] = useState(() => ({
     ...emptyEvent(event?.kind || defaultKind),
     ...(event || {}),
@@ -84,7 +85,6 @@ export default function EventForm({ event, defaultKind, t, onSave, onClose, onEr
           <span className="field__label">{t(`photoLabel_${draft.kind}`)}</span>
           <PhotoPicker
             value={draft.photo}
-            t={t}
             onChange={(photo) => setDraft((d) => ({ ...d, photo }))}
             onError={onError}
           />

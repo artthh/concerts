@@ -7,7 +7,7 @@ iOS/Android home screen and run full-screen, like the `mi-gym` app.
 - **Stack:** Vite + React 19, no backend, no CSS framework.
 - **Storage:** `localStorage` on the device, with JSON backup export/import.
 - **Photos:** picked from the phone, cropped and downscaled in the browser.
-- **Languages:** Spanish (default) and English, toggled in settings.
+- **Language:** English only.
 - **Theme:** dark by default (the design is dark-first); light is available in
   settings.
 
@@ -118,7 +118,7 @@ src/
     storage.js              localStorage keys, backup envelope
     events.js               the event record, categories, date helpers, stats
     photos.js               crop/downscale + per-event photo storage
-    i18n.js                 ES/EN strings, date and money formatting
+    i18n.js                 every UI string, date and money formatting
   components/
     TopNav.jsx              mic, section pills, add button
     HomeView.jsx            hero for the next event, grid, then the numbers

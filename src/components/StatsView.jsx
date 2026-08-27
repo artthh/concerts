@@ -1,5 +1,5 @@
 import { KINDS, buildStats } from '../lib/events.js'
-import { formatMoney } from '../lib/i18n.js'
+import { formatMoney, t } from '../lib/i18n.js'
 import Stars from './Stars.jsx'
 
 function Bars({ rows }) {
@@ -19,7 +19,7 @@ function Bars({ rows }) {
   )
 }
 
-export default function StatsView({ events, lang, t }) {
+export default function StatsView({ events }) {
   if (events.length === 0) {
     return <p className="empty">{t('emptyStats')}</p>
   }
@@ -78,7 +78,7 @@ export default function StatsView({ events, lang, t }) {
           <div className="stat-grid">
             {stats.spendByCurrency.map(([currency, amount]) => (
               <div className="stat" key={currency}>
-                <div className="stat__value">{formatMoney(amount, currency, lang)}</div>
+                <div className="stat__value">{formatMoney(amount, currency)}</div>
                 <div className="stat__label">{currency}</div>
               </div>
             ))}

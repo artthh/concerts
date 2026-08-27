@@ -5,7 +5,6 @@ const PREFIX = 'concerts.'
 export const KEYS = {
   concerts: PREFIX + 'items',
   theme: PREFIX + 'theme',
-  lang: PREFIX + 'lang',
   kind: PREFIX + 'kind',
 }
 

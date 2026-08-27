@@ -1,18 +1,18 @@
 import { daysUntil, isUpcoming, sortByDate } from '../lib/events.js'
-import { formatEventDate } from '../lib/i18n.js'
+import { formatEventDate, t } from '../lib/i18n.js'
 import StatsView from './StatsView.jsx'
 
 // Shared by the hero and the tiles: the number is the point, so today and
 // tomorrow become words and everything else is a plain count.
-function countdown(event, t) {
+function countdown(event) {
   const delta = daysUntil(event)
   if (delta === 0) return { value: t('today'), label: '', word: true }
   if (delta === 1) return { value: t('tomorrow'), label: '', word: true }
   return { value: String(Math.abs(delta ?? 0)), label: t('daysLeft'), word: false }
 }
 
-function Hero({ event, lang, t, onOpen }) {
-  const { value, label, word } = countdown(event, t)
+function Hero({ event, onOpen }) {
+  const { value, label, word } = countdown(event)
   return (
     <button type="button" className="hero" onClick={() => onOpen(event)}>
       {event.photo ? (
@@ -30,7 +30,7 @@ function Hero({ event, lang, t, onOpen }) {
           {event.emoji && <span className="hero__emoji"> {event.emoji}</span>}
         </span>
         {event.venue && <span className="hero__meta">{event.venue}</span>}
-        <span className="hero__meta">{formatEventDate(event.date, lang)}</span>
+        <span className="hero__meta">{formatEventDate(event.date)}</span>
         <span className="hero__count">
           <span className={word ? 'hero__count-n hero__count-n--word' : 'hero__count-n'}>
             {value}
@@ -42,8 +42,8 @@ function Hero({ event, lang, t, onOpen }) {
   )
 }
 
-function Tile({ event, lang, t, onOpen }) {
-  const { value, label, word } = countdown(event, t)
+function Tile({ event, onOpen }) {
+  const { value, label, word } = countdown(event)
   return (
     <button type="button" className="tile" onClick={() => onOpen(event)}>
       {event.photo ? (
@@ -65,7 +65,7 @@ function Tile({ event, lang, t, onOpen }) {
           {event.title}
           {event.emoji && <span> {event.emoji}</span>}
         </span>
-        <span className="tile__meta">{event.venue || formatEventDate(event.date, lang)}</span>
+        <span className="tile__meta">{event.venue || formatEventDate(event.date)}</span>
       </span>
     </button>
   )
@@ -73,7 +73,7 @@ function Tile({ event, lang, t, onOpen }) {
 
 // The overview: the very next event large, then the ones after it as a grid,
 // then the running numbers.
-export default function HomeView({ events, lang, t, onOpen }) {
+export default function HomeView({ events, onOpen }) {
   const upcoming = sortByDate(events.filter((e) => isUpcoming(e)), 'asc')
   const [next, ...rest] = upcoming
 
@@ -84,7 +84,7 @@ export default function HomeView({ events, lang, t, onOpen }) {
       {next ? (
         <>
           <h2 className="section__title">{t('nextUp')}</h2>
-          <Hero event={next} lang={lang} t={t} onOpen={onOpen} />
+          <Hero event={next} onOpen={onOpen} />
         </>
       ) : (
         <p className="empty">{t('emptyUpcoming')}</p>
@@ -95,13 +95,13 @@ export default function HomeView({ events, lang, t, onOpen }) {
           <h2 className="section__title">{t('thenComes')}</h2>
           <div className="tile-grid">
             {rest.map((event) => (
-              <Tile key={event.id} event={event} lang={lang} t={t} onOpen={onOpen} />
+              <Tile key={event.id} event={event} onOpen={onOpen} />
             ))}
           </div>
         </section>
       )}
 
-      <StatsView events={events} lang={lang} t={t} />
+      <StatsView events={events} />
     </>
   )
 }
