@@ -22,7 +22,7 @@ export default function BackupPanel({
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `encore-backup-${new Date().toISOString().slice(0, 10)}.json`
+    link.download = `countdown-backup-${new Date().toISOString().slice(0, 10)}.json`
     link.click()
     URL.revokeObjectURL(url)
   }

@@ -1,8 +1,8 @@
-# Encore — Event Tracker
+# Countdown — Event Tracker
 
-A phone-first web app to track the events you are going to and the ones you
-already lived — concerts, movies and shows. Built to be added to the
-iOS/Android home screen and run full-screen, like the `mi-gym` app.
+A phone-first web app for how long until the things ahead, and how long since
+the ones behind — concerts, movies, shows and personal plans. Built to be added
+to the iOS/Android home screen and run full-screen, like the `mi-gym` app.
 
 - **Stack:** Vite + React 19, no backend, no CSS framework.
 - **Storage:** `localStorage` on the device, with JSON backup export/import.
@@ -14,13 +14,16 @@ iOS/Android home screen and run full-screen, like the `mi-gym` app.
 
 ## Categories
 
-Every event is a **concert**, a **movie** or a **show**. The category is only a
-filter and a set of form fields — one record shape covers all three, so
-sorting, storage, backups and the countdown behave identically everywhere.
+Every event is a **concert**, a **movie**, a **show** or a **plan** — that last
+one for anything personal with a date on it: a friend visiting, a trip, a
+deadline. The category is only a filter and a set of form fields; one record
+shape covers all four, so sorting, storage, backups and the countdown behave
+identically everywhere.
 
 Concerts carry the long tail of optional fields (tour, city, price, seat,
-openers, company, rating, setlist, notes, ticket link). Movies and shows are
-just name, emoji, photo, date and venue, which is all they are worth typing.
+openers, company, rating, setlist, notes, ticket link). Movies, shows and plans
+are just name, emoji, photo, date and place, which is all they are worth
+typing.
 
 The venue field suggests places already used, as tappable chips and as a
 `datalist` for typing. Venues used for the category being added rank first — a
@@ -34,9 +37,13 @@ photo on the right. Navigation is a floating translucent bar centred at the
 bottom, with the content scrolling visibly underneath it. Adding belongs to
 Events: `+` floats above the bar there and nowhere else.
 
+The `localStorage` keys still use the original `concerts.` prefix. Renaming
+them would orphan everyone's existing data for no benefit, so the prefix is
+deliberately left alone.
+
 **Events** is the main list: upcoming events, soonest first. The page title
 *is* the category switcher — tapping "Concerts" opens Concerts / Movies /
-Shows with a count each. Each card carries the photo on one edge — clipped to a
+Shows / Plans with a count each. Each card carries the photo on one edge — clipped to a
 diagonal and feathered so it bleeds into the card — with the name, venue, date
 and days left on the other. The photo side alternates down the list, left /
 right / left, and because the side comes from the card's position it
@@ -52,7 +59,7 @@ over every event, not just the past ones on screen.
 
 **Home** is the landing screen and stays deliberately bare: the very next event
 as a full-width hero, the ones after it as a grid of small tiles three across,
-and nothing else. All three categories mix here, ordered purely by date — Home
+and nothing else. All four categories mix here, ordered purely by date — Home
 answers "what is next", not "what kind". The tiles are tight on purpose: at
 that size they carry the countdown and the title only, since the point is
 seeing a lot of the calendar at once rather than every detail.
@@ -100,7 +107,7 @@ when you want the file to win outright.
 
 ## Regenerating the icons
 
-`public/icon.svg` and the PNGs are the 🎤 emoji on a dark gradient. An emoji
+`public/icon.svg` and the PNGs are the ⏳ emoji on a dark gradient. An emoji
 needs a real font renderer, so `npm run icons` has a headless Chrome draw the
 glyph; the cropping and downscaling that follow are done with node's `zlib`, so
 the script still takes no npm dependency. It does need a Chrome or Chromium on
@@ -118,7 +125,7 @@ So every icon is rendered at 512, cropped square, then box-filtered down.
 ```
 index.html                  PWA meta tags + the pre-paint theme script
 public/
-  icon.svg                  source artwork: the mic emoji on a dark gradient
+  icon.svg                  source artwork: the hourglass emoji on a dark gradient
   manifest.webmanifest      home-screen install manifest
   apple-touch-icon.png      generated (npm run icons)
   icon-*.png                generated (npm run icons)
@@ -157,8 +164,8 @@ One flat, JSON-safe object per event, defined in `src/lib/events.js`:
 | Field                      | Notes                                          |
 | -------------------------- | ---------------------------------------------- |
 | `id`                       | local UUID                                     |
-| `kind`                     | `concert` \| `movie` \| `show`                  |
-| `title`                    | artist, film or show name — the only required   |
+| `kind`                     | `concert` \| `movie` \| `show` \| `plan`         |
+| `title`                    | artist, film, show or plan name — the only one required |
 | `emoji`                    | shown after the title on the cards             |
 | `photo`                    | cropped photo, stored as a data URL            |
 | `venue`                    | where it happens, shown on every card          |

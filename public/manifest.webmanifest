@@ -1,7 +1,7 @@
 {
-  "name": "Encore — Event Tracker",
-  "short_name": "Encore",
-  "description": "Track the concerts, movies and shows you are going to and the ones you already lived.",
+  "name": "Countdown — Event Tracker",
+  "short_name": "Countdown",
+  "description": "How long until the concerts, movies, shows and plans ahead, and how long since the ones behind.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -1,4 +1,4 @@
-// Generates the PNG app icons: the microphone emoji on the same dark gradient
+// Generates the PNG app icons: the hourglass emoji on the same dark gradient
 // as public/icon.svg.
 //
 //   npm run icons
@@ -31,7 +31,7 @@ import { dirname, join } from 'node:path'
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public')
 
-const EMOJI = '🎤'
+const EMOJI = '⏳'
 const GRADIENT = 'linear-gradient(135deg, #1b1030 0%, #07040d 100%)'
 const RENDER = 512 // Chrome renders at this size; must stay >= MIN_WIDTH.
 const MIN_WIDTH = 500 // Chrome's window-width floor.
@@ -294,7 +294,7 @@ if (RENDER < MIN_WIDTH) {
   throw new Error(`RENDER must stay at or above ${MIN_WIDTH}: Chrome clamps the window width.`)
 }
 
-const work = mkdtempSync(join(tmpdir(), 'encore-icons-'))
+const work = mkdtempSync(join(tmpdir(), 'countdown-icons-'))
 try {
   for (const output of OUTPUTS) {
     const html = join(work, `${output.file}.html`)

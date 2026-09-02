@@ -39,7 +39,7 @@ export const BACKUP_VERSION = 1
 
 export function exportBackup(concerts) {
   return {
-    app: 'encore',
+    app: 'countdown',
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
     concerts,

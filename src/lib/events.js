@@ -6,7 +6,7 @@
 //
 //   {
 //     id:         string        stable local id
-//     kind:       'concert' | 'movie' | 'show'
+//     kind:       'concert' | 'movie' | 'show' | 'plan'
 //     title:      string        artist, film or show name (required)
 //     emoji:      string        shown after the title on the cards
 //     photo:      string        cropped photo as a data URL
@@ -21,11 +21,11 @@
 //     updatedAt:  ISO string
 //   }
 
-export const KINDS = ['concert', 'movie', 'show']
+export const KINDS = ['concert', 'movie', 'show', 'plan']
 export const DEFAULT_KIND = 'concert'
 
-// Only concerts carry the long tail of extras; the other kinds are name, photo,
-// date and venue, which is all they are worth typing.
+// Only concerts carry the long tail of extras. Movies, shows and plans are
+// name, photo, date and place, which is all they are worth typing.
 export const KINDS_WITH_EXTRAS = new Set(['concert'])
 
 export const CURRENCIES = ['MXN', 'USD', 'EUR', 'GBP', 'CAD', 'BRL', 'ARS', 'COP', 'CLP', 'JPY']
