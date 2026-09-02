@@ -1,13 +1,13 @@
 // The event record and every derived value the views need.
 //
-// One flat, JSON-safe shape covers all three kinds. A movie simply leaves the
+// One flat, JSON-safe shape covers all four kinds. A movie simply leaves the
 // concert-only fields empty rather than having a record type of its own, which
 // keeps sorting, storage, backups and the countdown logic identical everywhere:
 //
 //   {
 //     id:         string        stable local id
 //     kind:       'concert' | 'movie' | 'show' | 'plan'
-//     title:      string        artist, film or show name (required)
+//     title:      string        artist, film, show or plan name (required)
 //     emoji:      string        shown after the title on the cards
 //     photo:      string        cropped photo as a data URL
 //     venue:      string        where it happens -- shown on every card
