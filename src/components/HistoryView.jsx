@@ -22,7 +22,9 @@ export default function HistoryView({
 }) {
   const sorted = sortByDate(events, 'desc')
   // Only categories with something in them get a chip: filtering to an empty
-  // list is never what you wanted, and the row stays short.
+  // list is never what you wanted, and the row stays short. It shows as soon
+  // as there is any history at all -- even a single category is worth seeing,
+  // because that is how you learn the row is there before it fills up.
   const filters = ['all', ...KINDS.filter((option) => counts[option] > 0)]
 
   // Group by year so a history that spans a decade stays scannable.
@@ -49,7 +51,7 @@ export default function HistoryView({
       <BackupPanel events={allEvents} onImport={onImport} onToast={onToast} compact />
       <p className="backup__note">{t('backupNote')}</p>
 
-      {filters.length > 2 && (
+      {filters.length > 1 && (
         <div className="filter-chips">
           {filters.map((option) => (
             <button

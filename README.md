@@ -76,7 +76,8 @@ re-alternates when an event slots into the middle.
 and counting the days *since*. It filters by category on its own axis,
 independent of Events — a row of chips with a count each, showing only the
 categories that actually have past events, so anniversaries never appear
-there. It also carries
+there. The row is there from the first past event, even when only one
+category has any: that is how you find out it exists before it fills up. It also carries
 **Export** and **Import** at the top: this is the screen you open after
 reinstalling, so a restore belongs where the records are. A search field
 appears once there are eight or more. Below the records are the **Numbers** —
