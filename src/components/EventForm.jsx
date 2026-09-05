@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react'
 import {
+  ALWAYS_YEARLY,
   CURRENCIES,
   KINDS,
   KINDS_WITH_EXTRAS,
+  KINDS_WITH_REPEAT,
+  REPEATS,
   emptyEvent,
   normalizeEvent,
   venueSuggestions,
@@ -27,10 +30,25 @@ export default function EventForm({ event, defaultKind, events, onSave, onClose,
   // name, photo, date and venue, so there is nothing to fold away for them.
   const [showExtras, setShowExtras] = useState(false)
   const hasExtras = KINDS_WITH_EXTRAS.has(draft.kind)
+  // Anniversaries are yearly by definition, so they get no picker -- just the
+  // note that the date is the original one. Plans get to choose.
+  const alwaysYearly = ALWAYS_YEARLY.has(draft.kind)
+  const canRepeat = KINDS_WITH_REPEAT.has(draft.kind)
+  const repeats = alwaysYearly || draft.repeat !== 'none'
   // Places already used, so a regular haunt is one tap instead of retyping it.
   const venues = useMemo(() => venueSuggestions(events, draft.kind), [events, draft.kind])
 
   const set = (key) => (event_) => setDraft((d) => ({ ...d, [key]: event_.target.value }))
+
+  // Changing the category can change what repeating means: anniversaries are
+  // forced yearly, and a kind that cannot repeat must not keep a stale value.
+  function pickKind(next) {
+    setDraft((d) => ({
+      ...d,
+      kind: next,
+      repeat: ALWAYS_YEARLY.has(next) ? 'yearly' : KINDS_WITH_REPEAT.has(next) ? d.repeat : 'none',
+    }))
+  }
 
   function submit(submitEvent) {
     submitEvent.preventDefault()
@@ -59,7 +77,7 @@ export default function EventForm({ event, defaultKind, events, onSave, onClose,
                 key={option}
                 type="button"
                 aria-pressed={draft.kind === option}
-                onClick={() => setDraft((d) => ({ ...d, kind: option }))}
+                onClick={() => pickKind(option)}
               >
                 <span aria-hidden="true">{t(`kindIcon_${option}`)}</span>
                 {t(`kind_${option}`)}
@@ -105,7 +123,7 @@ export default function EventForm({ event, defaultKind, events, onSave, onClose,
           <div className="field-row">
             <div className="field">
               <label className="field__label" htmlFor="date">
-                {t('date')}
+                {repeats ? t('originDateLabel') : t('date')}
               </label>
               <input id="date" type="date" className="input" value={draft.date} onChange={set('date')} />
             </div>
@@ -119,9 +137,33 @@ export default function EventForm({ event, defaultKind, events, onSave, onClose,
         ) : (
           <div className="field">
             <label className="field__label" htmlFor="date">
-              {t('date')}
+              {repeats ? t('originDateLabel') : t('date')}
             </label>
             <input id="date" type="date" className="input" value={draft.date} onChange={set('date')} />
+            {repeats && (
+              <div className="field__hint">
+                {alwaysYearly ? t('originDateHint_anniversary') : t('originDateHint')}
+              </div>
+            )}
+          </div>
+        )}
+
+        {canRepeat && (
+          <div className="field">
+            <span className="field__label">{t('repeat')}</span>
+            <div className="kind-picker repeat-picker">
+              {REPEATS.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  aria-pressed={draft.repeat === option}
+                  onClick={() => setDraft((d) => ({ ...d, repeat: option }))}
+                >
+                  {t(`repeat_${option}`)}
+                </button>
+              ))}
+            </div>
+            {draft.repeat !== 'none' && <div className="field__hint">{t('repeatHint')}</div>}
           </div>
         )}
 

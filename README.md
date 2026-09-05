@@ -1,8 +1,9 @@
 # Countdown — Event Tracker
 
 A phone-first web app for how long until the things ahead, and how long since
-the ones behind — concerts, movies, shows and personal plans. Built to be added
-to the iOS/Android home screen and run full-screen, like the `mi-gym` app.
+the ones behind — concerts, movies, shows, personal plans and the birthdays
+that come round every year. Built to be added to the iOS/Android home screen
+and run full-screen, like the `mi-gym` app.
 
 - **Stack:** Vite + React 19, no backend, no CSS framework.
 - **Storage:** `localStorage` on the device, with JSON backup export/import.
@@ -14,16 +15,38 @@ to the iOS/Android home screen and run full-screen, like the `mi-gym` app.
 
 ## Categories
 
-Every event is a **concert**, a **movie**, a **show** or a **plan** — that last
-one for anything personal with a date on it: a friend visiting, a trip, a
-deadline. The category is only a filter and a set of form fields; one record
-shape covers all four, so sorting, storage, backups and the countdown behave
-identically everywhere.
+Every event is a **concert**, a **movie**, a **show**, a **plan** or an
+**anniversary**. A plan is anything personal with a date on it: a friend
+visiting, a trip, a deadline. An anniversary is a birthday or a yearly
+celebration, where the point is *which* one it is. The category is only a
+filter and a set of form fields; one record shape covers all five, so sorting,
+storage, backups and the countdown behave identically everywhere.
 
 Concerts carry the long tail of optional fields (tour, city, price, seat,
-openers, company, rating, setlist, notes, ticket link). Movies, shows and plans
-are just name, emoji, photo, date and place, which is all they are worth
-typing.
+openers, company, rating, setlist, notes, ticket link). The rest are just name,
+emoji, photo, date and place, which is all they are worth typing.
+
+## Things that repeat
+
+`date` on a repeating event is the **original** date — the birth, the first
+year, the first payday — and the date it counts to is derived from it. That is
+what lets an anniversary know it is the 30th, and it means the record never has
+to be edited as the years go by.
+
+Anniversaries are always yearly; there is no picker for them. Plans get one:
+once, every year, every month or every two weeks — so **payday is a repeating
+plan**, not a category of its own. Anything that recurs on a schedule but is
+not about a count of years belongs there.
+
+A repeating event is always upcoming: the day after it happens it rolls to the
+next occurrence rather than dropping into History. Feb 29 lands on Feb 28 in a
+common year, and a monthly event on the 31st lands on the last day of a short
+month.
+
+For anniversaries the ordinal — 30th, 7th — rides the top corner of the Home
+tile and the hero, and the corner opposite the photo on the list cards. It is
+absent until the original date has passed: the birth itself is not a
+birthday.
 
 The venue field suggests places already used, as tappable chips and as a
 `datalist` for typing. Venues used for the category being added rank first — a
@@ -50,7 +73,10 @@ right / left, and because the side comes from the card's position it
 re-alternates when an event slots into the middle.
 
 **History** is the same card for events whose date has passed, grouped by year
-and counting the days *since*, across every category. It also carries
+and counting the days *since*. It filters by category on its own axis,
+independent of Events — a row of chips with a count each, showing only the
+categories that actually have past events, so anniversaries never appear
+there. It also carries
 **Export** and **Import** at the top: this is the screen you open after
 reinstalling, so a restore belongs where the records are. A search field
 appears once there are eight or more. Below the records are the **Numbers** —
@@ -59,7 +85,7 @@ over every event, not just the past ones on screen.
 
 **Home** is the landing screen and stays deliberately bare: the very next event
 as a full-width hero, the ones after it as a grid of small tiles three across,
-and nothing else. All four categories mix here, ordered purely by date — Home
+and nothing else. Every category mixes here, ordered purely by date — Home
 answers "what is next", not "what kind". The tiles are tight on purpose: at
 that size they carry the countdown and the title only, since the point is
 seeing a lot of the calendar at once rather than every detail.
@@ -164,23 +190,26 @@ One flat, JSON-safe object per event, defined in `src/lib/events.js`:
 | Field                      | Notes                                          |
 | -------------------------- | ---------------------------------------------- |
 | `id`                       | local UUID                                     |
-| `kind`                     | `concert` \| `movie` \| `show` \| `plan`         |
-| `title`                    | artist, film, show or plan name — the only one required |
+| `kind`                     | `concert` \| `movie` \| `show` \| `plan` \| `anniversary` |
+| `title`                    | artist, film, show, plan or person — the only one required |
+| `repeat`                   | `none` \| `yearly` \| `monthly` \| `biweekly`   |
 | `emoji`                    | shown after the title on the cards             |
 | `photo`                    | cropped photo, stored as a data URL            |
 | `venue`                    | where it happens, shown on every card          |
-| `date`, `time`             | `YYYY-MM-DD`; `time` is concerts only          |
+| `date`, `time`             | `YYYY-MM-DD`; the original date when it repeats. `time` is concerts only |
 | `createdAt`, `updatedAt`   | ISO timestamps                                 |
 
 Concerts additionally use `openers`, `tour`, `city`, `country`, `price`,
 `currency`, `seat`, `company`, `rating`, `setlist`, `notes` and `ticketUrl`.
 
 An event counts as **upcoming** through the end of its own day, then moves to
-History on its own — there is no status field to maintain.
+History on its own — there is no status field to maintain. A repeating one
+never moves: it rolls to its next occurrence instead.
 
 Records written before categories existed have `artist` and no `kind`;
-`normalizeEvent` reads them as concerts, so old data and old backups keep
-loading unchanged.
+`normalizeEvent` reads them as concerts, and records written before repeats
+existed get `repeat: 'none'`, so old data and old backups keep loading
+unchanged.
 
 ## Photos and the storage budget
 

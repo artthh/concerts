@@ -43,34 +43,55 @@ const STRINGS = {
   kind_movie: 'Movie',
   kind_show: 'Show',
   kind_plan: 'Plan',
+  kind_anniversary: 'Anniversary',
   kindPlural_concert: 'Concerts',
   kindPlural_movie: 'Movies',
   kindPlural_show: 'Shows',
   kindPlural_plan: 'Plans',
+  kindPlural_anniversary: 'Anniversaries',
   kindIcon_concert: '🎤',
   kindIcon_movie: '🎬',
   kindIcon_show: '🎭',
   kindIcon_plan: '🗓️',
+  kindIcon_anniversary: '🎂',
   titleLabel_concert: 'Artist',
   titleLabel_movie: 'Movie',
   titleLabel_show: 'Show',
   titleLabel_plan: 'Plan',
+  titleLabel_anniversary: 'Who or what',
   titleRequired_concert: 'Artist is required',
   titleRequired_movie: 'The movie name is required',
   titleRequired_show: 'The show name is required',
   titleRequired_plan: 'The plan needs a name',
+  titleRequired_anniversary: 'This needs a name',
   venueLabel_concert: 'Venue',
   venueLabel_movie: 'Cinema',
   venueLabel_show: 'Place',
   venueLabel_plan: 'Where',
+  venueLabel_anniversary: 'Where',
   photoLabel_concert: 'Artist photo',
   photoLabel_movie: 'Poster',
   photoLabel_show: 'Photo',
   photoLabel_plan: 'Photo',
+  photoLabel_anniversary: 'Photo',
   emptyKind_concert: 'No concerts on the calendar. Add the next one.',
   emptyKind_movie: 'No movies on the calendar. Add the next one.',
   emptyKind_show: 'No shows on the calendar. Add the next one.',
   emptyKind_plan: 'Nothing planned. Add the next one.',
+  emptyKind_anniversary: 'No birthdays or anniversaries yet. Add the first one.',
+
+  repeat: 'Repeats',
+  repeat_none: 'Once',
+  repeat_yearly: 'Every year',
+  repeat_monthly: 'Every month',
+  repeat_biweekly: 'Every 2 weeks',
+  repeatHint: 'A repeating event never leaves the countdown — it just rolls to the next one.',
+  originDateLabel: 'First date',
+  originDateHint_anniversary: 'The birth or the first year. The number is counted from here.',
+  originDateHint: 'The first time it happens. The countdown rolls forward from here.',
+  occurrenceLabel: 'This one is the',
+  nthYear: 'Number {n}',
+  filterAll: 'All',
 
   emoji: 'Emoji',
   emojiHint: 'Shown next to the name on the cards.',
@@ -154,10 +175,16 @@ export function formatDate(dateISO) {
   })
 }
 
-// 1st, 2nd, 3rd, 4th... 11th, 12th, 13th, 21st.
-function ordinal(day) {
-  if (day % 100 >= 11 && day % 100 <= 13) return day + 'th'
-  return day + ['th', 'st', 'nd', 'rd'][day % 10 > 3 ? 0 : day % 10]
+// 1st, 2nd, 3rd, 4th... 11th, 12th, 13th, 21st. Used for card dates and for
+// which birthday or anniversary this one is. The suffix is separate because
+// the badges set it smaller than the number it hangs off.
+export function ordinalSuffix(n) {
+  if (n % 100 >= 11 && n % 100 <= 13) return 'th'
+  return ['th', 'st', 'nd', 'rd'][n % 10 > 3 ? 0 : n % 10]
+}
+
+export function ordinal(n) {
+  return String(n) + ordinalSuffix(n)
 }
 
 // The card format: "September 9th | 2026".

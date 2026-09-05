@@ -1,4 +1,4 @@
-import { sortByDate } from '../lib/events.js'
+import { KINDS, sortByDate } from '../lib/events.js'
 import { t } from '../lib/i18n.js'
 import BackupPanel from './BackupPanel.jsx'
 import PageHeader from './PageHeader.jsx'
@@ -16,8 +16,14 @@ export default function HistoryView({
   query,
   onQuery,
   searchable,
+  kind,
+  onKind,
+  counts,
 }) {
   const sorted = sortByDate(events, 'desc')
+  // Only categories with something in them get a chip: filtering to an empty
+  // list is never what you wanted, and the row stays short.
+  const filters = ['all', ...KINDS.filter((option) => counts[option] > 0)]
 
   // Group by year so a history that spans a decade stays scannable.
   const years = []
@@ -43,6 +49,33 @@ export default function HistoryView({
       <BackupPanel events={allEvents} onImport={onImport} onToast={onToast} compact />
       <p className="backup__note">{t('backupNote')}</p>
 
+      {filters.length > 2 && (
+        <div className="filter-chips">
+          {filters.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className="chip-button"
+              aria-pressed={kind === option}
+              onClick={() => onKind(option)}
+            >
+              {option === 'all' ? (
+                t('filterAll')
+              ) : (
+                <>
+                  <span aria-hidden="true">{t(`kindIcon_${option}`)}</span> {t(`kindPlural_${option}`)}
+                </>
+              )}
+              <span className="chip-button__count">
+                {option === 'all'
+                  ? KINDS.reduce((sum, k) => sum + (counts[k] || 0), 0)
+                  : counts[option]}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {searchable && (
         <input
           className="search"
@@ -54,7 +87,7 @@ export default function HistoryView({
       )}
 
       {sorted.length === 0 ? (
-        <p className="empty">{query ? t('noResults') : t('emptyHistory')}</p>
+        <p className="empty">{query || kind !== 'all' ? t('noResults') : t('emptyHistory')}</p>
       ) : (
         years.map((group) => (
           <section className="section" key={group.year}>

@@ -1,7 +1,7 @@
 {
   "name": "Countdown — Event Tracker",
   "short_name": "Countdown",
-  "description": "How long until the concerts, movies, shows and plans ahead, and how long since the ones behind.",
+  "description": "How long until the concerts, movies, shows, plans and birthdays ahead, and how long since the ones behind.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

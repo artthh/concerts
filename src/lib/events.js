@@ -6,12 +6,17 @@
 //
 //   {
 //     id:         string        stable local id
-//     kind:       'concert' | 'movie' | 'show' | 'plan'
-//     title:      string        artist, film, show or plan name (required)
+//     kind:       'concert' | 'movie' | 'show' | 'plan' | 'anniversary'
+//     title:      string        artist, film, show, plan or person (required)
+//     repeat:     'none' | 'yearly' | 'monthly' | 'biweekly'
 //     emoji:      string        shown after the title on the cards
 //     photo:      string        cropped photo as a data URL
 //     venue:      string        where it happens -- shown on every card
-//     date:       'YYYY-MM-DD'  local calendar date (required)
+//     date:       'YYYY-MM-DD'  required. For a repeating event this is the
+//                               ORIGINAL date -- the birth, the first year, the
+//                               first payday -- not the next occurrence, which
+//                               is derived. That is what lets an anniversary
+//                               know it is the 30th.
 //     time:       'HH:MM'       concerts only, optional
 //
 //     ...and, for concerts only: openers, tour, city, country, price,
@@ -21,8 +26,18 @@
 //     updatedAt:  ISO string
 //   }
 
-export const KINDS = ['concert', 'movie', 'show', 'plan']
+export const KINDS = ['concert', 'movie', 'show', 'plan', 'anniversary']
 export const DEFAULT_KIND = 'concert'
+
+export const REPEATS = ['none', 'yearly', 'monthly', 'biweekly']
+
+// An anniversary is a birthday or a yearly celebration: it always repeats, and
+// the point of it is which one this is -- the 30th, the 7th.
+export const ALWAYS_YEARLY = new Set(['anniversary'])
+
+// Kinds whose form offers a repeat choice. Anniversaries do not: they are
+// yearly by definition.
+export const KINDS_WITH_REPEAT = new Set(['plan'])
 
 // Only concerts carry the long tail of extras. Movies, shows and plans are
 // name, photo, date and place, which is all they are worth typing.
@@ -40,6 +55,7 @@ export function emptyEvent(kind = DEFAULT_KIND) {
     venue: '',
     date: todayISO(),
     time: '',
+    repeat: ALWAYS_YEARLY.has(kind) ? 'yearly' : 'none',
     openers: [],
     tour: '',
     city: '',
@@ -71,6 +87,7 @@ export function normalizeEvent(input) {
     emoji: String(c.emoji || '').trim(),
     photo: String(c.photo || ''),
     venue: String(c.venue || '').trim(),
+    repeat: normalizeRepeat(c),
     openers: toList(c.openers),
     company: toList(c.company),
     setlist: toList(c.setlist),
@@ -79,6 +96,13 @@ export function normalizeEvent(input) {
     createdAt: c.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
+}
+
+// Anniversaries are yearly whatever the record says; everything else takes the
+// stored value, defaulting to a one-off.
+function normalizeRepeat(event) {
+  if (ALWAYS_YEARLY.has(event.kind)) return 'yearly'
+  return REPEATS.includes(event.repeat) ? event.repeat : 'none'
 }
 
 export function newId() {
@@ -105,22 +129,82 @@ export function todayISO() {
   return new Date(now.getTime() - offset).toISOString().slice(0, 10)
 }
 
-// An event counts as upcoming through the end of its own day.
+const iso = (y, m, d) =>
+  `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+
+const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate()
+
+// The date this event is actually counting to. A one-off counts to its own
+// date; a repeating one counts to its next occurrence on or after today, so a
+// birthday never falls into the past.
+export function nextOccurrence(event, today = todayISO()) {
+  const date = String(event.date || '')
+  const repeat = event.repeat || 'none'
+  if (repeat === 'none' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return date
+
+  const [, month, day] = date.split('-').map(Number)
+
+  if (repeat === 'yearly') {
+    // Start at this year and roll forward. Feb 29 lands on Feb 28 in a common
+    // year rather than silently sliding into March, which is what the Date
+    // constructor would do.
+    for (let y = Number(today.slice(0, 4)); y <= Number(today.slice(0, 4)) + 1; y++) {
+      const candidate = iso(y, month - 1, Math.min(day, daysInMonth(y, month - 1)))
+      if (candidate >= today) return candidate
+    }
+    return date
+  }
+
+  if (repeat === 'monthly') {
+    let y = Number(today.slice(0, 4))
+    let m = Number(today.slice(5, 7)) - 1
+    for (let step = 0; step < 24; step++) {
+      const candidate = iso(y, m, Math.min(day, daysInMonth(y, m)))
+      if (candidate >= today) return candidate
+      m += 1
+      if (m > 11) { m = 0; y += 1 }
+    }
+    return date
+  }
+
+  // Biweekly: step 14 days from the original until it reaches today.
+  const start = Date.parse(date + 'T00:00:00')
+  const now = Date.parse(today + 'T00:00:00')
+  if (Number.isNaN(start) || Number.isNaN(now) || start >= now) return date
+  const periods = Math.ceil((now - start) / (14 * 86400000))
+  return new Date(start + periods * 14 * 86400000).toISOString().slice(0, 10)
+}
+
+// Which occurrence the next one is: the 30th birthday, the 7th anniversary.
+// Null when it does not apply, and when the original date is still ahead --
+// the birth itself is not a birthday.
+export function occurrenceNumber(event, today = todayISO()) {
+  if ((event.repeat || 'none') !== 'yearly') return null
+  const originYear = Number(String(event.date || '').slice(0, 4))
+  const nextYear = Number(nextOccurrence(event, today).slice(0, 4))
+  if (!originYear || !nextYear) return null
+  const n = nextYear - originYear
+  return n > 0 ? n : null
+}
+
+// An event counts as upcoming through the end of its own day. A repeating one
+// always is: there is always another occurrence coming.
 export function isUpcoming(event, today = todayISO()) {
+  if ((event.repeat || 'none') !== 'none') return true
   return String(event.date || '') >= today
 }
 
 export function daysUntil(event, today = todayISO()) {
   const a = Date.parse(today + 'T00:00:00')
-  const b = Date.parse(String(event.date || '') + 'T00:00:00')
+  const b = Date.parse(nextOccurrence(event, today) + 'T00:00:00')
   if (Number.isNaN(a) || Number.isNaN(b)) return null
   return Math.round((b - a) / 86400000)
 }
 
-export function sortByDate(events, direction = 'asc') {
+export function sortByDate(events, direction = 'asc', today = todayISO()) {
   const sign = direction === 'asc' ? 1 : -1
   return [...events].sort((a, b) => {
-    const byDate = String(a.date).localeCompare(String(b.date))
+    const byDate = nextOccurrence(a, today).localeCompare(nextOccurrence(b, today))
     if (byDate !== 0) return byDate * sign
     return String(a.time || '').localeCompare(String(b.time || '')) * sign
   })

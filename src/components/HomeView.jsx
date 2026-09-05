@@ -1,5 +1,5 @@
-import { daysUntil, isUpcoming, sortByDate } from '../lib/events.js'
-import { formatEventDate, t } from '../lib/i18n.js'
+import { daysUntil, isUpcoming, nextOccurrence, occurrenceNumber, sortByDate } from '../lib/events.js'
+import { formatEventDate, ordinalSuffix, t } from '../lib/i18n.js'
 import PageHeader from './PageHeader.jsx'
 
 // Shared by the hero and the tiles: the number is the point, so today and
@@ -13,6 +13,7 @@ function countdown(event) {
 
 function Hero({ event, onOpen }) {
   const { value, label, word } = countdown(event)
+  const nth = occurrenceNumber(event)
   return (
     <button type="button" className="hero" onClick={() => onOpen(event)}>
       {event.photo ? (
@@ -23,6 +24,12 @@ function Hero({ event, onOpen }) {
         </span>
       )}
       <span className="hero__scrim" />
+      {nth !== null && (
+        <span className="nth nth--hero" aria-label={t('nthYear', { n: nth })}>
+          {nth}
+          <span className="nth__suffix">{ordinalSuffix(nth)}</span>
+        </span>
+      )}
       <span className="hero__body">
         <span className="hero__kind">{t(`kind_${event.kind}`)}</span>
         <span className="hero__title">
@@ -30,7 +37,7 @@ function Hero({ event, onOpen }) {
           {event.emoji && <span className="hero__emoji"> {event.emoji}</span>}
         </span>
         {event.venue && <span className="hero__meta">{event.venue}</span>}
-        <span className="hero__meta">{formatEventDate(event.date)}</span>
+        <span className="hero__meta">{formatEventDate(nextOccurrence(event))}</span>
         <span className="hero__count">
           <span className={word ? 'hero__count-n hero__count-n--word' : 'hero__count-n'}>
             {value}
@@ -44,6 +51,9 @@ function Hero({ event, onOpen }) {
 
 function Tile({ event, onOpen }) {
   const { value, label, word } = countdown(event)
+  // Birthdays and anniversaries are about which one this is, so the number
+  // rides the top corner where nothing else on the tile competes with it.
+  const nth = occurrenceNumber(event)
   return (
     <button type="button" className="tile" onClick={() => onOpen(event)}>
       {event.photo ? (
@@ -54,6 +64,12 @@ function Tile({ event, onOpen }) {
         </span>
       )}
       <span className="tile__scrim" />
+      {nth !== null && (
+        <span className="nth nth--tile" aria-label={t('nthYear', { n: nth })}>
+          {nth}
+          <span className="nth__suffix">{ordinalSuffix(nth)}</span>
+        </span>
+      )}
       <span className="tile__body">
         <span className="tile__count">
           <span className={word ? 'tile__count-n tile__count-n--word' : 'tile__count-n'}>

@@ -580,25 +580,133 @@ textarea {
   text-overflow: ellipsis;
 }
 
-/* Kind picker in the form ------------------------------------------------ */
+/* The birthday / anniversary number ---------------------------------------
+   Which one this is *is* the point of these events, so it gets a corner of
+   its own: a gold glass pill that reads over any photo without competing
+   with the countdown at the bottom of the card. */
+
+.nth {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  border-radius: 999px;
+  border: 1px solid rgba(208, 169, 115, 0.55);
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #f0d5a8;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.4px;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.nth__suffix {
+  font-size: 0.62em;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: lowercase;
+}
+
+.nth--tile {
+  top: 6px;
+  right: 6px;
+  padding: 5px 7px;
+  font-size: 14px;
+}
+
+.nth--hero {
+  top: 12px;
+  right: 12px;
+  padding: 8px 12px;
+  font-size: 22px;
+}
+
+/* On a list card the badge sits opposite the photo, so it never lands on a
+   face. */
+.nth--card {
+  top: 12px;
+  padding: 6px 9px;
+  font-size: 16px;
+}
+
+.show--left .nth--card {
+  right: 12px;
+}
+
+.show--right .nth--card {
+  left: 12px;
+}
+
+/* History filter --------------------------------------------------------- */
+
+/* Wraps rather than scrolling sideways: five categories do not fit across a
+   phone, and a chip you have to discover by swiping is a chip nobody taps. */
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.filter-chips .chip-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.filter-chips .chip-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.chip-button__count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.filter-chips .chip-button[aria-pressed='true'] .chip-button__count {
+  color: inherit;
+  opacity: 0.75;
+}
+
+/* Pickers in the form ----------------------------------------------------
+   A grid rather than a row: five categories will not fit across a phone, and
+   a wrapping grid keeps every option the same size as the rest. */
 
 .kind-picker {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
+.repeat-picker {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .kind-picker button {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
+  min-width: 0;
   padding: 10px 4px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--card);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .kind-picker button[aria-pressed='true'] {

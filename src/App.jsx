@@ -37,6 +37,9 @@ export default function App() {
     return KINDS.includes(stored) ? stored : DEFAULT_KIND
   })
   const [query, setQuery] = useState('')
+  // History spans every category and grows without limit, so it filters on its
+  // own axis -- independent of the category Events is showing.
+  const [historyKind, setHistoryKind] = useState('all')
   const [editing, setEditing] = useState(null) // event draft in the form sheet
   const [detail, setDetail] = useState(null) // event id open in the detail sheet
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -67,7 +70,19 @@ export default function App() {
   // itself the day after it happens. The category is an independent filter.
   const upcoming = useMemo(() => events.filter((e) => isUpcoming(e)), [events])
   const past = useMemo(() => events.filter((e) => !isUpcoming(e)), [events])
-  const pastMatching = useMemo(() => past.filter((e) => matchesQuery(e, query)), [past, query])
+  const pastMatching = useMemo(
+    () =>
+      past.filter(
+        (e) => (historyKind === 'all' || e.kind === historyKind) && matchesQuery(e, query),
+      ),
+    [past, query, historyKind],
+  )
+  // Only the categories that actually have history: an empty chip is noise.
+  const pastCounts = useMemo(() => {
+    const counts = Object.fromEntries(KINDS.map((k) => [k, 0]))
+    for (const event of past) counts[event.kind] = (counts[event.kind] || 0) + 1
+    return counts
+  }, [past])
   const upcomingOfKind = useMemo(() => upcoming.filter((e) => e.kind === kind), [upcoming, kind])
   const upcomingCounts = useMemo(() => {
     const counts = Object.fromEntries(KINDS.map((k) => [k, 0]))
@@ -162,6 +177,9 @@ export default function App() {
             query={query}
             onQuery={setQuery}
             searchable={past.length >= SEARCHABLE_FROM}
+            kind={historyKind}
+            onKind={setHistoryKind}
+            counts={pastCounts}
           />
         )}
       </main>

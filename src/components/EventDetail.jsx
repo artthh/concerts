@@ -1,5 +1,11 @@
-import { KINDS_WITH_EXTRAS, daysUntil, isUpcoming } from '../lib/events.js'
-import { formatDate, formatMoney, relativeDays, t } from '../lib/i18n.js'
+import {
+  KINDS_WITH_EXTRAS,
+  daysUntil,
+  isUpcoming,
+  nextOccurrence,
+  occurrenceNumber,
+} from '../lib/events.js'
+import { formatDate, formatMoney, ordinal, relativeDays, t } from '../lib/i18n.js'
 import Modal from './Modal.jsx'
 import Stars from './Stars.jsx'
 
@@ -15,16 +21,21 @@ function Row({ label, children }) {
 
 export default function EventDetail({ event, onEdit, onDelete, onClose }) {
   const hasExtras = KINDS_WITH_EXTRAS.has(event.kind)
+  const repeats = (event.repeat || 'none') !== 'none'
+  const nth = occurrenceNumber(event)
 
   return (
     <Modal title={event.title} onClose={onClose} closeLabel={t('close')}>
       {event.photo && <img className="detail__photo" src={event.photo} alt="" />}
       <div className="detail__meta">
         <Row label={t('category')}>{t(`kind_${event.kind}`)}</Row>
-        <Row label={t('date')}>
+        <Row label={repeats ? t('originDateLabel') : t('date')}>
           {formatDate(event.date)}
           {event.time ? ` · ${event.time}` : ''}
         </Row>
+        {repeats && <Row label={t('repeat')}>{t(`repeat_${event.repeat}`)}</Row>}
+        {repeats && <Row label={t('nextUp')}>{formatDate(nextOccurrence(event))}</Row>}
+        {nth !== null && <Row label={t('occurrenceLabel')}>{ordinal(nth)}</Row>}
         <Row label={isUpcoming(event) ? t('countdown') : t('daysSince')}>
           {relativeDays(daysUntil(event))}
         </Row>
