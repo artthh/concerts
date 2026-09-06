@@ -977,6 +977,74 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 
+/* Per-category glimpses: one card per category in use, each surfacing only
+   what that category's own fields make meaningful. */
+
+.glimpse-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.glimpse {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.glimpse__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.glimpse__title {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.glimpse__count {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.glimpse__sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.glimpse__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.glimpse__icon {
+  flex: 0 0 auto;
+}
+
+.glimpse__label {
+  flex: 0 0 auto;
+  color: var(--text-dim);
+}
+
+.glimpse__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-weight: 700;
+}
+
 .stars {
   color: var(--accent-2);
   font-size: 12px;

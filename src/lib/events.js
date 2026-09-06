@@ -260,25 +260,25 @@ export function venueSuggestions(events, kind, limit = 6) {
     .map((entry) => entry.venue)
 }
 
+// Counts occurrences of whatever `pick` returns (a value, or a list of them),
+// most common first. Shared by the overall totals and the per-category ones.
+function tally(list, pick) {
+  const map = new Map()
+  for (const e of list) {
+    for (const value of [].concat(pick(e)).filter(Boolean)) {
+      map.set(value, (map.get(value) || 0) + 1)
+    }
+  }
+  return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+}
+
+// The mix-everything-together numbers: how much there is, and when it
+// happened. Anything more specific than that -- venues, spend, ratings --
+// means something different in each category, so it lives in buildKindStats
+// instead of being averaged across things that are not comparable.
 export function buildStats(events, today = todayISO()) {
   const past = events.filter((e) => !isUpcoming(e, today))
   const upcoming = events.filter((e) => isUpcoming(e, today))
-
-  const count = (list, pick) => {
-    const map = new Map()
-    for (const e of list) {
-      for (const value of [].concat(pick(e)).filter(Boolean)) {
-        map.set(value, (map.get(value) || 0) + 1)
-      }
-    }
-    return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  }
-
-  const spendByCurrency = new Map()
-  for (const e of events) {
-    if (typeof e.price !== 'number' || Number.isNaN(e.price)) continue
-    spendByCurrency.set(e.currency || '—', (spendByCurrency.get(e.currency || '—') || 0) + e.price)
-  }
 
   const byYear = new Map()
   for (const e of past) {
@@ -289,21 +289,51 @@ export function buildStats(events, today = todayISO()) {
   const byKind = new Map(KINDS.map((kind) => [kind, 0]))
   for (const e of events) byKind.set(e.kind, (byKind.get(e.kind) || 0) + 1)
 
-  const rated = past.filter((e) => e.rating > 0)
-
   return {
     total: events.length,
     pastCount: past.length,
     upcomingCount: upcoming.length,
     byKind: [...byKind.entries()],
-    titles: count(events, (e) => e.title),
-    cities: count(events, (e) => e.city),
-    venues: count(events, (e) => e.venue),
-    company: count(events, (e) => e.company),
-    spendByCurrency: [...spendByCurrency.entries()].sort((a, b) => b[1] - a[1]),
     byYear: [...byYear.entries()].sort((a, b) => a[0].localeCompare(b[0])),
+  }
+}
+
+// A glimpse of one category: what shows up here depends on which fields that
+// category actually uses, since "top city" means nothing for a birthday and
+// "turning 30" means nothing for a concert.
+export function buildKindStats(events, kind, today = todayISO()) {
+  const list = events.filter((e) => e.kind === kind)
+  const past = list.filter((e) => !isUpcoming(e, today))
+  const upcoming = list.filter((e) => isUpcoming(e, today))
+  const rated = list.filter((e) => e.rating > 0)
+
+  const spendByCurrency = new Map()
+  for (const e of list) {
+    if (typeof e.price !== 'number' || Number.isNaN(e.price)) continue
+    spendByCurrency.set(e.currency || '—', (spendByCurrency.get(e.currency || '—') || 0) + e.price)
+  }
+
+  // Which one has racked up the most occurrences so far -- the birthday or
+  // anniversary that has been going on the longest.
+  const longestRunning = list
+    .map((event) => ({ event, nth: occurrenceNumber(event, today) }))
+    .filter((entry) => entry.nth !== null)
+    .sort((a, b) => b.nth - a.nth)[0]
+
+  const repeating = list.filter((e) => (e.repeat || 'none') !== 'none')
+
+  return {
+    kind,
+    total: list.length,
+    pastCount: past.length,
+    upcomingCount: upcoming.length,
+    titles: tally(list, (e) => e.title),
+    venues: tally(list, (e) => e.venue),
+    spendByCurrency: [...spendByCurrency.entries()].sort((a, b) => b[1] - a[1]),
     averageRating: rated.length ? rated.reduce((sum, e) => sum + e.rating, 0) / rated.length : null,
-    topRated: [...rated].sort((a, b) => b.rating - a.rating).slice(0, 5),
-    next: sortByDate(upcoming, 'asc')[0] || null,
+    repeatingCount: repeating.length,
+    oneOffCount: list.length - repeating.length,
+    longestRunning: longestRunning ? { title: longestRunning.event.title, nth: longestRunning.nth } : null,
+    next: sortByDate(upcoming, 'asc', today)[0] || null,
   }
 }

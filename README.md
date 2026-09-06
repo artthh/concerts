@@ -77,12 +77,22 @@ and counting the days *since*. It filters by category on its own axis,
 independent of Events — a row of chips with a count each, showing only the
 categories that actually have past events, so anniversaries never appear
 there. The row is there from the first past event, even when only one
-category has any: that is how you find out it exists before it fills up. It also carries
-**Export** and **Import** at the top: this is the screen you open after
-reinstalling, so a restore belongs where the records are. A search field
-appears once there are eight or more. Below the records are the **Numbers** —
-totals, ticket spend, per-year counts, most seen titles and cities — computed
-over every event, not just the past ones on screen.
+category has any: that is how you find out it exists before it fills up.
+
+It also carries **Export** and **Import** at the top: this is the screen you
+open after reinstalling, so a restore belongs where the records are. A search
+field appears once there are eight or more.
+
+Below the records are the **Numbers**, computed over every event, not just the
+past ones on screen: an overall total/attended/upcoming and the per-year
+timeline, then a glimpse card per category in use. What shows up in each
+card depends on what that category's own fields make meaningful, rather than
+averaging things that were never comparable — a top city means nothing for a
+birthday, and "turning 30" means nothing for a concert. A concert's card can
+carry its most-visited venue, most-seen artist, average rating and ticket
+spend; a plan's carries its repeating/one-off split and what's next; an
+anniversary's carries how many are being tracked and which one has been going
+on the longest.
 
 **Home** is the landing screen and stays deliberately bare: the very next event
 as a full-width hero, the ones after it as a grid of small tiles three across,
@@ -174,7 +184,7 @@ src/
     EventsView.jsx          upcoming events + the category switcher
     HistoryView.jsx         past events by year, backup, then the numbers
     EventCard.jsx           one card: photo on one edge, countdown on the other
-    StatsView.jsx           totals, spend, per-year and top-N bars
+    StatsView.jsx           totals, per-year timeline, per-category glimpses
     SettingsView.jsx        profile photo, theme, backup
     BackupPanel.jsx         export/import, shared by History and Settings
     EventForm.jsx           add/edit sheet, fields depend on the category
