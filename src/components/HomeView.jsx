@@ -1,5 +1,5 @@
 import { daysUntil, isUpcoming, nextOccurrence, occurrenceNumber, sortByDate } from '../lib/events.js'
-import { formatEventDate, ordinalSuffix, t } from '../lib/i18n.js'
+import { formatEventDate, formatShortDate, ordinalSuffix, t } from '../lib/i18n.js'
 import PageHeader from './PageHeader.jsx'
 
 // Shared by the hero and the tiles: the number is the point, so today and
@@ -64,6 +64,7 @@ function Tile({ event, onOpen }) {
         </span>
       )}
       <span className="tile__scrim" />
+      <span className="tile__date">{formatShortDate(nextOccurrence(event))}</span>
       {nth !== null && (
         <span className="nth nth--tile" aria-label={t('nthYear', { n: nth })}>
           {nth}

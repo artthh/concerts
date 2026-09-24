@@ -580,6 +580,27 @@ textarea {
   text-overflow: ellipsis;
 }
 
+/* The date, small and out of the way in the opposite corner from the
+   birthday badge -- enough to read at a glance without opening the card. */
+.tile__date {
+  position: absolute;
+  z-index: 2;
+  top: 6px;
+  left: 6px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 /* The birthday / anniversary number ---------------------------------------
    Which one this is *is* the point of these events, so it gets a corner of
    its own: a gold glass pill that reads over any photo without competing

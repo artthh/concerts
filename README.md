@@ -98,8 +98,9 @@ on the longest.
 as a full-width hero, the ones after it as a grid of small tiles three across,
 and nothing else. Every category mixes here, ordered purely by date — Home
 answers "what is next", not "what kind". The tiles are tight on purpose: at
-that size they carry the countdown and the title only, since the point is
-seeing a lot of the calendar at once rather than every detail.
+that size they carry the countdown and the title, plus the date itself as a
+small badge in the corner opposite the birthday number, since the point is
+seeing a lot of the calendar at once without having to open anything.
 
 Nothing is moved by hand — the date is the only thing that decides which
 section an event is in, so it leaves Events on its own the day after it

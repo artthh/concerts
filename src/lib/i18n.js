@@ -199,6 +199,14 @@ export function formatEventDate(dateISO) {
   return `${month} ${ordinal(date.getDate())} | ${date.getFullYear()}`
 }
 
+// The tile-badge format: "Sep 12" -- short enough for a corner, no year,
+// since a tile is never showing an event more than a year or so out.
+export function formatShortDate(dateISO) {
+  const parsed = Date.parse(String(dateISO) + 'T00:00:00')
+  if (Number.isNaN(parsed)) return String(dateISO || '')
+  return new Date(parsed).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 export function formatMoney(amount, currency) {
   if (typeof amount !== 'number' || Number.isNaN(amount)) return ''
   try {
