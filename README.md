@@ -72,27 +72,31 @@ and days left on the other. The photo side alternates down the list, left /
 right / left, and because the side comes from the card's position it
 re-alternates when an event slots into the middle.
 
-**History** is the same card for events whose date has passed, grouped by year
-and counting the days *since*. It filters by category on its own axis,
-independent of Events — a row of chips with a count each, showing only the
-categories that actually have past events, so anniversaries never appear
-there. The row is there from the first past event, even when only one
-category has any: that is how you find out it exists before it fills up.
+**History** carries three things that used to all compete for the same
+screen, so it splits into tabs: **Records**, **Numbers** and **Backup**.
 
-It also carries **Export** and **Import** at the top: this is the screen you
-open after reinstalling, so a restore belongs where the records are. A search
-field appears once there are eight or more.
+**Records** is the same card as Events, but smaller — between the full size
+there and the minimal Home tile, so more of the list fits without opening
+anything — for events whose date has passed, grouped by year and counting the
+days *since*. It filters by category on its own axis, independent of Events —
+a row of chips with a count each, showing only the categories that actually
+have past events, so anniversaries never appear there. The row is there from
+the first past event, even when only one category has any: that is how you
+find out it exists before it fills up. A search field appears once there are
+eight or more.
 
-Below the records are the **Numbers**, computed over every event, not just the
-past ones on screen: an overall total/attended/upcoming and the per-year
-timeline, then a glimpse card per category in use. What shows up in each
-card depends on what that category's own fields make meaningful, rather than
-averaging things that were never comparable — a top city means nothing for a
-birthday, and "turning 30" means nothing for a concert. A concert's card can
-carry its most-visited venue, most-seen artist, average rating and ticket
-spend; a plan's carries its repeating/one-off split and what's next; an
-anniversary's carries how many are being tracked and which one has been going
-on the longest.
+**Numbers**, computed over every event, not just the past ones: an overall
+total/attended/upcoming and the per-year timeline, then a glimpse card per
+category in use. What shows up in each card depends on what that category's
+own fields make meaningful, rather than averaging things that were never
+comparable — a top city means nothing for a birthday, and "turning 30" means
+nothing for a concert. A concert's card can carry its most-visited venue,
+most-seen artist, average rating and ticket spend; a plan's carries its
+repeating/one-off split and what's next; an anniversary's carries how many
+are being tracked and which one has been going on the longest.
+
+**Backup** is **Export** and **Import**: this is the screen you open after
+reinstalling, so a restore belongs where the records are.
 
 **Home** is the landing screen and stays deliberately bare: the very next event
 as a full-width hero, the ones after it as a grid of small tiles three across,
@@ -183,7 +187,7 @@ src/
     Icons.jsx               inline line icons
     HomeView.jsx            hero for the next event, then the tile grid
     EventsView.jsx          upcoming events + the category switcher
-    HistoryView.jsx         past events by year, backup, then the numbers
+    HistoryView.jsx         Records / Numbers / Backup tabs
     EventCard.jsx           one card: photo on one edge, countdown on the other
     StatsView.jsx           totals, per-year timeline, per-category glimpses
     SettingsView.jsx        profile photo, theme, backup

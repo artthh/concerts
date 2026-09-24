@@ -3,7 +3,9 @@ import { formatEventDate, ordinalSuffix, t } from '../lib/i18n.js'
 
 // One event row. `side` decides which edge the photo sits on; the photo is
 // clipped to a diagonal and feathered into the card so it bleeds inward.
-export default function EventCard({ event, side, onOpen }) {
+// `compact` is the smaller variant History uses to fit more on screen --
+// between the full size here in Events and the minimal Home tile.
+export default function EventCard({ event, side, onOpen, compact }) {
   const delta = daysUntil(event)
   const past = delta !== null && delta < 0
   // Which birthday or anniversary the next one is. Null for everything else.
@@ -24,7 +26,11 @@ export default function EventCard({ event, side, onOpen }) {
   }
 
   return (
-    <button type="button" className={`show show--${side}`} onClick={() => onOpen(event)}>
+    <button
+      type="button"
+      className={`show show--${side}${compact ? ' show--compact' : ''}`}
+      onClick={() => onOpen(event)}
+    >
       {nth !== null && (
         <span className="nth nth--card" aria-label={t('nthYear', { n: nth })}>
           {nth}

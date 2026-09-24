@@ -919,6 +919,104 @@ textarea {
   white-space: nowrap;
 }
 
+/* History's compact card: between the full size in Events and the minimal
+   Home tile, so more of the list fits on screen without opening anything. */
+
+.show-list--compact {
+  gap: 14px;
+}
+
+.show--compact {
+  height: 96px;
+  border-radius: 16px;
+}
+
+.show--compact.show--left .show__photo {
+  clip-path: polygon(0 0, 100% 0, calc(100% - 20px) 100%, 0 100%);
+}
+
+.show--compact.show--right .show__photo {
+  clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.show--compact .show__photo-empty {
+  font-size: 20px;
+}
+
+.show--compact .show__body {
+  padding: 0 13px;
+}
+
+.show--compact .show__artist {
+  font-size: 16px;
+  letter-spacing: -0.3px;
+}
+
+.show--compact .show__emoji {
+  font-size: 15px;
+}
+
+.show--compact .show__venue {
+  font-size: 11px;
+}
+
+.show--compact .show__date {
+  font-size: 12px;
+}
+
+.show--compact .show__count {
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.show--compact .show__count-n {
+  font-size: 20px;
+  letter-spacing: -0.6px;
+}
+
+.show--compact .show__count-n--word {
+  font-size: 16px;
+}
+
+.show--compact .show__count-label {
+  font-size: 14px;
+}
+
+.show--compact .nth--card {
+  top: 7px;
+  padding: 4px 7px;
+  font-size: 12px;
+}
+
+/* Segmented tabs ----------------------------------------------------------- */
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  background: var(--card-2);
+  border: 1px solid var(--border);
+}
+
+.tabs__button {
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tabs__button[aria-pressed='true'] {
+  background: var(--card);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
 /* Stats ------------------------------------------------------------------ */
 
 .card {
