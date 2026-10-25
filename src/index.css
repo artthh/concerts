@@ -33,16 +33,21 @@
 }
 
 /* iPhone Duo and anything else wide enough: see useNavMode.js for why the
-   switch is on viewport width alone. --app-max grows by exactly --rail-w so
-   the content column stays the same width it already was, just shifted
-   right of the rail, instead of getting narrower. */
+   switch is on viewport width alone. The content column also grows here,
+   not just by --rail-w -- a Duo panel is real extra space, worth using for
+   more of the calendar at once on Home, rather than a wider gutter either
+   side of the same 560px phone column. These two targets land the outer
+   display's landscape pose (678) and the widest plain "rail" width (859)
+   close to edge-to-edge, and the inner display's landscape pose (951) with
+   only a sliver of margin, while still capping gracefully for an arbitrary
+   desktop window. */
 html[data-nav='rail'] {
-  --app-max: 638px; /* 560 + 78 */
+  --app-max: 758px; /* 680 content + 78 rail */
   --rail-w: 78px;
 }
 
 html[data-nav='rail-wide'] {
-  --app-max: 746px; /* 560 + 186 */
+  --app-max: 1006px; /* 820 content + 186 rail */
   --rail-w: 186px;
 }
 
@@ -527,6 +532,12 @@ html[data-nav='rail-wide'] .fab {
   position: relative;
   display: block;
   width: 100%;
+  /* Capped and centred rather than left to stretch: the wider content
+     column on a Duo panel is for fitting more of the tile grid below, not
+     for turning the one next event into a very wide, flat banner. */
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
   padding: 0;
   height: 229px;
   overflow: hidden;
@@ -662,14 +673,33 @@ html[data-nav='rail-wide'] .fab {
   .page-header + .show-list {
     margin-top: 10px;
   }
+
+  /* The same squeeze applies to the event detail sheet opened from Home or
+     Events: a 4:5 hero at this width is taller than the whole sheet on a
+     ~466pt-tall display, pushing the title and venue below the fold before
+     the sheet has even rendered. A fixed, shorter height keeps the photo
+     and its overlaid text both visible without opening the sheet to a
+     mostly-empty screen. */
+  .detail-hero {
+    aspect-ratio: auto;
+    height: 280px;
+  }
+
+  .detail-hero__title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
-/* Three across rather than two, so a screenful shows roughly twice as many.
-   At this size there is no room for a third line, so the tiles carry the
-   countdown and the title only -- the rest is a tap away. */
+/* Three across on a phone, more as the column widens -- auto-fill keeps
+   every tile close to the same size instead of 3 fixed columns stretching
+   into oversized tiles once there is real width to spare, e.g. on an
+   unfolded Duo. At this size there is no room for a third line, so the
+   tiles carry the countdown and the title only -- the rest is a tap away. */
 .tile-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 10px;
 }
 
@@ -825,6 +855,13 @@ html[data-nav='rail-wide'] .fab {
   right: 12px;
   padding: 8px 12px;
   font-size: 22px;
+}
+
+.nth--detail {
+  top: 14px;
+  right: 14px;
+  padding: 8px 12px;
+  font-size: 20px;
 }
 
 /* On a list card the badge sits opposite the photo, so it never lands on a
@@ -1590,12 +1627,129 @@ html[data-nav='rail-wide'] .fab {
 
 /* Detail ----------------------------------------------------------------- */
 
-.detail__photo {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 16px;
+/* The event's own share card. It bleeds past the sheet's own padding to its
+   top and side edges -- hence the negative margin -- so it reads as a
+   poster rather than an inset thumbnail, and a 4:5 ratio rather than a
+   fixed, wide-and-short height so a screenshot of it looks intentional. */
+.detail-hero {
+  position: relative;
   display: block;
+  width: calc(100% + 32px);
+  margin: -16px -16px 0;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+  background: var(--card);
+}
+
+.detail-hero__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.detail-hero__photo--empty {
+  display: grid;
+  place-items: center;
+  font-size: 96px;
+  background: linear-gradient(150deg, var(--card-2), var(--card-edge));
+}
+
+.detail-hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.35) 48%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
+}
+
+.detail-hero__close {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 14px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.detail-hero__body {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 20px 20px 22px;
+  color: #fff;
+}
+
+.detail-hero__kind {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+
+.detail-hero__title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+  line-height: 1.1;
+}
+
+.detail-hero__emoji {
+  font-size: 26px;
+}
+
+.detail-hero__meta {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.detail-hero__count {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.detail-hero__count-n {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1.6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail-hero__count-n--word {
+  font-size: 30px;
+  letter-spacing: -0.6px;
+}
+
+.detail-hero__count-label {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--gold);
 }
 
 .detail__meta {

@@ -81,12 +81,16 @@ than on the next reload:
 - **860px and up** (the inner display in landscape, and any wider window):
   the rail widens and its tabs gain labels.
 
-Below 440 this is invisible. Above it, `.app`'s own `max-width` grows by
-exactly the rail's width, so the centred content column stays the same width
-it already was rather than getting narrower — it just sits to the right of
-the rail instead of dead-centre. A `max-height: 520px` query also trims the
-Home hero and section spacing, since the outer display is only ~466pt tall
-in landscape and a hero sized for a 390-wide phone would eat a third of it.
+Below 440 this is invisible. Above it, `.app`'s own `max-width` grows by more
+than just the rail's width — a Duo panel is real extra space, worth spending
+on more of Home's tile grid rather than a wider gutter either side of the
+same phone-width column. The two targets land the outer display's landscape
+pose and the widest plain "rail" width close to edge-to-edge, and the inner
+display's landscape pose with only a sliver of margin, while still capping
+gracefully for an arbitrary desktop window. A `max-height: 520px` query also
+trims the Home hero and section spacing, since the outer display is only
+~466pt tall in landscape and a hero sized for a 390-wide phone would eat a
+third of it.
 
 **Events** is the main list: upcoming events, soonest first. The page title
 *is* the category switcher — tapping "Concerts" opens Concerts / Movies /
@@ -95,6 +99,14 @@ diagonal and feathered so it bleeds into the card — with the name, venue, date
 and days left on the other. The photo side alternates down the list, left /
 right / left, and because the side comes from the card's position it
 re-alternates when an event slots into the middle.
+
+Tapping any card opens its detail sheet, which leads with a poster-style hero
+of its own — a 4:5 photo (or the category's emoji on a gradient, if there is
+no photo), scrim, and the title/venue/date/countdown overlaid on it, the
+close button floating over the corner instead of a header bar above it. It is
+built to be the thing a screenshot of this screen actually looks like: not a
+flat, wide-and-short rectangle followed by a plain list. The full detail list
+— every field, the setlist, edit and delete — is still there, just below it.
 
 **History** carries three things that used to all compete for the same
 screen, so it splits into tabs: **Records**, **Numbers** and **Backup**.
@@ -123,12 +135,16 @@ are being tracked and which one has been going on the longest.
 reinstalling, so a restore belongs where the records are.
 
 **Home** is the landing screen and stays deliberately bare: the very next event
-as a full-width hero, the ones after it as a grid of small tiles three across,
-and nothing else. Every category mixes here, ordered purely by date — Home
-answers "what is next", not "what kind". The tiles are tight on purpose: at
-that size they carry the countdown and the title, plus the date itself as a
-small badge in the corner opposite the birthday number, since the point is
-seeing a lot of the calendar at once without having to open anything.
+as a hero, the ones after it as a grid of small tiles, and nothing else. Every
+category mixes here, ordered purely by date — Home answers "what is next", not
+"what kind". The tiles are tight on purpose: at that size they carry the
+countdown and the title, plus the date itself as a small badge in the corner
+opposite the birthday number, since the point is seeing a lot of the calendar
+at once without having to open anything. Three across on a phone; the grid is
+`auto-fill`, so a wider column (see Duo, below) fits more tiles at roughly the
+same size instead of stretching three into oversized ones. The hero itself
+stays capped at a sensible width rather than growing with it — more columns
+of tiles is the point, not one very wide, flat banner.
 
 Nothing is moved by hand — the date is the only thing that decides which
 section an event is in, so it leaves Events on its own the day after it
@@ -220,7 +236,7 @@ src/
     BackupPanel.jsx         export/import, shared by History and Settings
     EventForm.jsx           add/edit sheet, fields depend on the category
     PhotoPicker.jsx         photo field with crop preview
-    EventDetail.jsx         read-only sheet
+    EventDetail.jsx         read-only sheet, poster hero up top
     Modal.jsx               bottom-sheet shell
     Stars.jsx               rating display
 ```

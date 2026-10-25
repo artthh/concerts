@@ -5,7 +5,16 @@ import {
   nextOccurrence,
   occurrenceNumber,
 } from '../lib/events.js'
-import { formatDate, formatMoney, ordinal, relativeDays, t } from '../lib/i18n.js'
+import {
+  formatDate,
+  formatEventDate,
+  formatMoney,
+  ordinal,
+  ordinalSuffix,
+  relativeDays,
+  t,
+} from '../lib/i18n.js'
+import { CloseIcon } from './Icons.jsx'
 import Modal from './Modal.jsx'
 import Stars from './Stars.jsx'
 
@@ -19,14 +28,88 @@ function Row({ label, children }) {
   )
 }
 
+// Same today/tomorrow/yesterday-as-words treatment as the cards and tiles,
+// since this is the one screen most likely to end up as a screenshot.
+function countdown(event) {
+  const delta = daysUntil(event)
+  const past = delta !== null && delta < 0
+  let count = String(Math.abs(delta ?? 0))
+  let label = past ? t('daysSince') : t('daysLeft')
+  if (delta === 0) {
+    count = t('today')
+    label = ''
+  } else if (delta === 1) {
+    count = t('tomorrow')
+    label = ''
+  } else if (delta === -1) {
+    count = t('yesterday')
+    label = ''
+  }
+  return { count, label, word: label === '' }
+}
+
+// The event's own share card: a poster-style hero rather than a plain,
+// very wide-and-short rectangle, so a screenshot taken straight off this
+// screen is something worth sharing.
+function DetailHero({ event, onClose }) {
+  const { count, label, word } = countdown(event)
+  const nth = occurrenceNumber(event)
+
+  return (
+    <div className="detail-hero">
+      {event.photo ? (
+        <img className="detail-hero__photo" src={event.photo} alt="" />
+      ) : (
+        <span className="detail-hero__photo detail-hero__photo--empty" aria-hidden="true">
+          {t(`kindIcon_${event.kind}`)}
+        </span>
+      )}
+      <span className="detail-hero__scrim" />
+      <button
+        type="button"
+        className="detail-hero__close"
+        onClick={onClose}
+        aria-label={t('close')}
+      >
+        <CloseIcon width={18} height={18} />
+      </button>
+      {nth !== null && (
+        <span className="nth nth--detail" aria-label={t('nthYear', { n: nth })}>
+          {nth}
+          <span className="nth__suffix">{ordinalSuffix(nth)}</span>
+        </span>
+      )}
+      <span className="detail-hero__body">
+        <span className="detail-hero__kind">{t(`kind_${event.kind}`)}</span>
+        <span className="detail-hero__title">
+          {event.title}
+          {event.emoji && <span className="detail-hero__emoji"> {event.emoji}</span>}
+        </span>
+        {event.venue && <span className="detail-hero__meta">{event.venue}</span>}
+        <span className="detail-hero__meta">{formatEventDate(nextOccurrence(event))}</span>
+        <span className="detail-hero__count">
+          <span
+            className={
+              word ? 'detail-hero__count-n detail-hero__count-n--word' : 'detail-hero__count-n'
+            }
+          >
+            {count}
+          </span>
+          {label && <span className="detail-hero__count-label">{label}</span>}
+        </span>
+      </span>
+    </div>
+  )
+}
+
 export default function EventDetail({ event, onEdit, onDelete, onClose }) {
   const hasExtras = KINDS_WITH_EXTRAS.has(event.kind)
   const repeats = (event.repeat || 'none') !== 'none'
   const nth = occurrenceNumber(event)
 
   return (
-    <Modal title={event.title} onClose={onClose} closeLabel={t('close')}>
-      {event.photo && <img className="detail__photo" src={event.photo} alt="" />}
+    <Modal title={event.title} onClose={onClose} closeLabel={t('close')} noHeader>
+      <DetailHero event={event} onClose={onClose} />
       <div className="detail__meta">
         <Row label={t('category')}>{t(`kind_${event.kind}`)}</Row>
         <Row label={repeats ? t('originDateLabel') : t('date')}>
