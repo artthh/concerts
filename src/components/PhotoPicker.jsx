@@ -1,33 +1,28 @@
 import { useRef, useState } from 'react'
-import { preparePhoto } from '../lib/photos.js'
+import { PHOTO_SIZE } from '../lib/photos.js'
 import { t } from '../lib/i18n.js'
+import PhotoCropper from './PhotoCropper.jsx'
 
-// Crops the picked file straight away so the preview is exactly what gets
-// stored and shown on the cards.
+// Every photo is cropped by hand, not just auto-centred: the picked file
+// opens PhotoCropper first, and only its confirmed result ever reaches
+// onChange, so the preview here is exactly what gets stored and shown on
+// the cards.
 export default function PhotoPicker({
   value,
   placeholder = '🎤',
-  width,
-  height,
+  width = PHOTO_SIZE,
+  height = PHOTO_SIZE,
   round = false,
   onChange,
   onError,
 }) {
   const input = useRef(null)
-  const [busy, setBusy] = useState(false)
+  const [pending, setPending] = useState(null)
 
-  async function handleFile(event) {
+  function handleFile(event) {
     const file = event.target.files?.[0]
     event.target.value = ''
-    if (!file) return
-    setBusy(true)
-    try {
-      onChange(await preparePhoto(file, width && height ? { width, height } : undefined))
-    } catch {
-      onError(t('photoFailed'))
-    } finally {
-      setBusy(false)
-    }
+    if (file) setPending(file)
   }
 
   return (
@@ -39,7 +34,6 @@ export default function PhotoPicker({
         aria-label={value ? t('changePhoto') : t('addPhoto')}
       >
         {value ? <img src={value} alt="" /> : <span aria-hidden="true">{placeholder}</span>}
-        {busy && <span className="photo-picker__busy">…</span>}
       </button>
       <div className="photo-picker__actions">
         <button type="button" className="chip-button" onClick={() => input.current?.click()}>
@@ -58,6 +52,23 @@ export default function PhotoPicker({
         hidden
         onChange={handleFile}
       />
+      {pending && (
+        <PhotoCropper
+          file={pending}
+          width={width}
+          height={height}
+          round={round}
+          onCancel={() => setPending(null)}
+          onConfirm={(dataUrl) => {
+            setPending(null)
+            onChange(dataUrl)
+          }}
+          onError={() => {
+            setPending(null)
+            onError(t('photoFailed'))
+          }}
+        />
+      )}
     </div>
   )
 }

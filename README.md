@@ -101,12 +101,13 @@ right / left, and because the side comes from the card's position it
 re-alternates when an event slots into the middle.
 
 Tapping any card opens its detail sheet, which leads with a poster-style hero
-of its own — a 4:5 photo (or the category's emoji on a gradient, if there is
-no photo), scrim, and the title/venue/date/countdown overlaid on it, the
-close button floating over the corner instead of a header bar above it. It is
-built to be the thing a screenshot of this screen actually looks like: not a
-flat, wide-and-short rectangle followed by a plain list. The full detail list
-— every field, the setlist, edit and delete — is still there, just below it.
+of its own — the same square photo (or the category's emoji on a gradient, if
+there is no photo), uncropped since it is already the shape the hero needs,
+with a scrim and the title/venue/date/countdown overlaid on it, and the close
+button floating over the corner instead of a header bar above it. It is built
+to be the thing a screenshot of this screen actually looks like: not a flat,
+wide-and-short rectangle followed by a plain list. The full detail list —
+every field, the setlist, edit and delete — is still there, just below it.
 
 **History** carries three things that used to all compete for the same
 screen, so it splits into tabs: **Records**, **Numbers** and **Backup**.
@@ -235,7 +236,8 @@ src/
     SettingsView.jsx        profile photo, theme, backup
     BackupPanel.jsx         export/import, shared by History and Settings
     EventForm.jsx           add/edit sheet, fields depend on the category
-    PhotoPicker.jsx         photo field with crop preview
+    PhotoPicker.jsx         photo field, opens PhotoCropper on pick
+    PhotoCropper.jsx        drag/pinch/zoom crop step before a photo saves
     EventDetail.jsx         read-only sheet, poster hero up top
     Modal.jsx               bottom-sheet shell
     Stars.jsx               rating display
@@ -272,14 +274,24 @@ unchanged.
 ## Photos and the storage budget
 
 Adding a show takes three things: artist, photo and date, plus an optional
-emoji. Everything else is folded behind "more details". The picked file is
-center-cropped to the card's aspect ratio and re-encoded as a 640x420 JPEG
-before it is stored, which turns a multi-megabyte camera roll photo into about
-65 KB.
+emoji. Everything else is folded behind "more details". Picking a file opens
+an interactive crop step (`PhotoCropper.jsx`) before anything is saved: drag
+to recentre, pinch, scroll, or use the slider to zoom, with the frame itself
+as the preview -- what it shows is exactly the square that gets encoded as a
+640x640 JPEG and stored, which turns a multi-megabyte camera roll photo into
+about 80 KB.
+
+Square, not the shape of any one card: a photo shows up at several different
+aspect ratios across the app -- the diagonal card strip, a square tile, the
+Home hero, the event detail screen's own share card -- each cropping further
+via `object-fit: cover`. A square start keeps every one of those a moderate
+crop instead of the tile being exact and the others severe, and it is the
+crop a person actually chose rather than an automatic centre-crop guessing
+for them.
 
 Photos are kept under one `concerts.photo.<id>` key each rather than inside the
 concerts blob, so editing a date rewrites a few hundred bytes instead of every
-photo. `localStorage` gives roughly 5 MB, which is about 70-75 photos; past that
+photo. `localStorage` gives roughly 5 MB, which is about 60-65 photos; past that
 the app keeps the concert, drops the photo, and says so. If the history ever
 needs to grow beyond that, `src/lib/photos.js` is the only file to change —
 IndexedDB drops in behind the same four functions.

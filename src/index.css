@@ -1554,8 +1554,8 @@ html[data-nav='rail-wide'] .fab {
 .photo-picker__preview {
   position: relative;
   flex: none;
-  width: 96px;
-  height: 68px;
+  width: 84px;
+  height: 84px;
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -1571,8 +1571,6 @@ html[data-nav='rail-wide'] .fab {
 }
 
 .photo-picker--round .photo-picker__preview {
-  width: 76px;
-  height: 76px;
   border-radius: 999px;
 }
 
@@ -1583,20 +1581,106 @@ html[data-nav='rail-wide'] .fab {
   border-style: dashed;
 }
 
-.photo-picker__busy {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.35);
-  color: #fff;
-  font-weight: 800;
-}
-
 .photo-picker__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+/* The crop step between picking a file and it landing on a card -- a plain
+   dark, always-on-top editor regardless of theme, the way a system photo
+   picker would be. Drag the frame to pan; the slider (or pinch, or wheel on
+   a desktop) to zoom; what it shows is exactly the square that gets saved. */
+.cropper {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px 20px calc(24px + var(--safe-bottom));
+  background: rgba(4, 2, 8, 0.96);
+}
+
+.cropper__title {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.cropper__frame {
+  position: relative;
+  width: min(320px, 76vw);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  background: var(--card-2);
+  touch-action: none;
+  cursor: grab;
+}
+
+.cropper__frame--round {
+  border-radius: 999px;
+}
+
+.cropper__frame:active {
+  cursor: grabbing;
+}
+
+.cropper__image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cropper__hint {
+  max-width: 320px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  text-align: center;
+}
+
+.cropper__zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.cropper__zoom-icon {
+  flex: none;
+  font-size: 14px;
+}
+
+.cropper__slider {
+  flex: 1;
+  accent-color: var(--accent);
+}
+
+.cropper__actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.cropper__actions .button {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.cropper__actions .button--primary {
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  border: none;
 }
 
 .venue-chips {
@@ -1629,14 +1713,16 @@ html[data-nav='rail-wide'] .fab {
 
 /* The event's own share card. It bleeds past the sheet's own padding to its
    top and side edges -- hence the negative margin -- so it reads as a
-   poster rather than an inset thumbnail, and a 4:5 ratio rather than a
-   fixed, wide-and-short height so a screenshot of it looks intentional. */
+   poster rather than an inset thumbnail. Square rather than a taller 4:5:
+   that is also exactly how every photo is now stored (see PHOTO_SIZE in
+   photos.js), so the hero shows it uncropped instead of cutting more off an
+   already-cropped square -- and it reads less overwhelmingly large too. */
 .detail-hero {
   position: relative;
   display: block;
   width: calc(100% + 32px);
   margin: -16px -16px 0;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1;
   overflow: hidden;
   border-radius: 24px 24px 0 0;
   background: var(--card);

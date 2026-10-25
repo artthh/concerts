@@ -7,9 +7,14 @@
 // localStorage — IndexedDB would drop in behind the same four functions.
 const PREFIX = 'concerts.photo.'
 
-// Cropped to the aspect ratio of the card photo panel, at 2x for retina.
-export const PHOTO_WIDTH = 640
-export const PHOTO_HEIGHT = 420
+// Square, not the card panel's own aspect ratio: a photo is displayed at
+// several different ratios across the app (the diagonal card strip, a
+// square tile, the Home hero, the 4:5 share card), each cropping further
+// via object-fit: cover. Square is the one shape that keeps every one of
+// those a moderate crop instead of the tile being perfect and the others
+// severe. The interactive cropper (PhotoCropper.jsx) is what lets a person
+// choose which part of the photo that square actually shows.
+export const PHOTO_SIZE = 640
 
 // The avatar is square and small, and stored under its own reserved id.
 export const PROFILE_ID = 'profile'
@@ -63,12 +68,14 @@ export function listPhotos(ids) {
   return out
 }
 
-// Center-crops to the card aspect ratio the same way `object-fit: cover` would,
-// then re-encodes as JPEG. Accepts a File from the picker or an existing
-// data URL (used to shrink a photo that did not fit).
+// Center-crops to a square the same way `object-fit: cover` would, then
+// re-encodes as JPEG. Only used to shrink an already-cropped photo at a
+// lower quality when storage is tight -- re-centering a square on itself is
+// a no-op crop, just a smaller re-encode. The interactive cropper picks the
+// actual crop the first time; see PhotoCropper.jsx.
 export async function preparePhoto(
   source,
-  { quality = QUALITIES[0], width = PHOTO_WIDTH, height = PHOTO_HEIGHT } = {},
+  { quality = QUALITIES[0], width = PHOTO_SIZE, height = PHOTO_SIZE } = {},
 ) {
   const image = await loadImage(source)
   const canvas = document.createElement('canvas')
