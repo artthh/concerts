@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import BottomNav from './components/BottomNav.jsx'
+import SideRail from './components/SideRail.jsx'
 import HomeView from './components/HomeView.jsx'
 import EventsView from './components/EventsView.jsx'
 import HistoryView from './components/HistoryView.jsx'
@@ -10,6 +11,7 @@ import Modal from './components/Modal.jsx'
 import { KEYS, load, save } from './lib/storage.js'
 import { PROFILE_ID, PROFILE_SIZE, getPhoto, removePhoto, storePhoto } from './lib/photos.js'
 import { DEFAULT_KIND, KINDS, isUpcoming, matchesQuery, normalizeEvent } from './lib/events.js'
+import { useNavMode } from './lib/useNavMode.js'
 import { t } from './lib/i18n.js'
 
 // Photos are kept in their own storage keys, so the events blob written on
@@ -45,6 +47,16 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [profilePhoto, setProfilePhoto] = useState(() => getPhoto(PROFILE_ID))
   const [toast, setToast] = useState('')
+  // iPhone Duo and anything else wide enough: the bottom bar becomes a side
+  // rail instead of staying fixed to the bottom, the same switch Journey
+  // makes, and for the same reason -- a bottom bar eats real height on a
+  // display that in one pose is only ~466pt tall.
+  const navMode = useNavMode()
+  const onRail = navMode !== 'bar'
+
+  useEffect(() => {
+    document.documentElement.dataset.nav = navMode
+  }, [navMode])
 
   useEffect(() => {
     save(KEYS.concerts, withoutPhotos(events))
@@ -152,6 +164,7 @@ export default function App() {
             profilePhoto={profilePhoto}
             onSettings={() => setSettingsOpen(true)}
             onOpen={(e) => setDetail(e.id)}
+            onRail={onRail}
           />
         )}
         {section === 'events' && (
@@ -163,6 +176,7 @@ export default function App() {
             profilePhoto={profilePhoto}
             onSettings={() => setSettingsOpen(true)}
             onOpen={(e) => setDetail(e.id)}
+            onRail={onRail}
           />
         )}
         {section === 'history' && (
@@ -180,19 +194,30 @@ export default function App() {
             kind={historyKind}
             onKind={setHistoryKind}
             counts={pastCounts}
+            onRail={onRail}
           />
         )}
       </main>
 
-      {/* Adding belongs to Events, and the bottom bar has no room for it, so it
-          floats above the bar on that section only. */}
+      {/* Adding belongs to Events, and a bar or rail both have no room for it,
+          so it floats above whichever one is showing, on that section only. */}
       {section === 'events' && (
         <button type="button" className="fab" onClick={() => setEditing({})} aria-label={t('add')}>
           +
         </button>
       )}
 
-      <BottomNav section={section} onSection={setSection} />
+      {onRail ? (
+        <SideRail
+          section={section}
+          onSection={setSection}
+          wide={navMode === 'rail-wide'}
+          profilePhoto={profilePhoto}
+          onSettings={() => setSettingsOpen(true)}
+        />
+      ) : (
+        <BottomNav section={section} onSection={setSection} />
+      )}
 
       {editing && (
         <EventForm

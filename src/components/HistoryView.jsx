@@ -23,6 +23,7 @@ export default function HistoryView({
   kind,
   onKind,
   counts,
+  onRail,
 }) {
   // History piles up records, the numbers computed from them and the backup
   // tools all in one place -- tabs keep those from competing for the same
@@ -50,7 +51,7 @@ export default function HistoryView({
 
   return (
     <>
-      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings}>
+      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings} hideActions={onRail}>
         <h1 className="page-title">{t('navHistory')}</h1>
       </PageHeader>
 

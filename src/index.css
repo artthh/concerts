@@ -25,6 +25,25 @@
   --radius: 18px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
+  /* The centred column's width and its left reservation for the nav, so
+     .app and every viewport-fixed element (.fab) can share one formula.
+     Redefined per nav mode below -- see useNavMode.js. */
+  --app-max: 560px;
+  --rail-w: 0px;
+}
+
+/* iPhone Duo and anything else wide enough: see useNavMode.js for why the
+   switch is on viewport width alone. --app-max grows by exactly --rail-w so
+   the content column stays the same width it already was, just shifted
+   right of the rail, instead of getting narrower. */
+html[data-nav='rail'] {
+  --app-max: 638px; /* 560 + 78 */
+  --rail-w: 78px;
+}
+
+html[data-nav='rail-wide'] {
+  --app-max: 746px; /* 560 + 186 */
+  --rail-w: 186px;
 }
 
 :root[data-theme='dark'] {
@@ -98,14 +117,36 @@ textarea {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  max-width: 560px;
+  max-width: var(--app-max);
   margin: 0 auto;
+  padding-left: var(--rail-w);
   background: var(--bg);
+}
+
+/* Apple's reserved folding region, via the Viewport Segments media query.
+   Whether Safari on iPhone Duo implements it is NOT verified -- the centred
+   .app above is what actually keeps content off the hinge in the poses that
+   matter -- but aligning to the first segment costs nothing where this is
+   unsupported, so it costs nothing to add. */
+@media (horizontal-viewport-segments: 2) {
+  .app {
+    max-width: env(viewport-segment-width 0 0, var(--app-max));
+    margin-left: 0;
+    margin-right: auto;
+  }
 }
 
 .app__main {
   flex: 1;
   padding: 0 16px calc(76px + max(6px, var(--safe-bottom)));
+}
+
+/* The rail replaces the bottom bar entirely, so nothing needs clearing
+   underneath it -- reserving 76px for a bar that is not there would just
+   waste the height the rail exists to save. */
+html[data-nav='rail'] .app__main,
+html[data-nav='rail-wide'] .app__main {
+  padding-bottom: max(16px, var(--safe-bottom));
 }
 
 .page-title {
@@ -226,7 +267,11 @@ textarea {
 /* Add: the mockup's bar has no room for it, so it floats above the bar. */
 .fab {
   position: fixed;
-  right: 18px;
+  /* .fab is fixed to the viewport, not to .app, so on anything wider than
+     --app-max this anchors it to .app's actual right edge instead of the
+     far corner of the window, which is where a plain `right: 18px` would
+     strand it once the column stopped filling the screen. */
+  right: max(18px, calc((100vw - var(--app-max)) / 2 + 18px));
   bottom: calc(72px + max(6px, var(--safe-bottom)));
   z-index: 31;
   width: 52px;
@@ -239,6 +284,110 @@ textarea {
   line-height: 1;
   background: linear-gradient(120deg, var(--accent), var(--accent-2));
   box-shadow: 0 10px 26px rgba(124, 58, 237, 0.45);
+}
+
+/* No bottom bar to float above once the rail is up. */
+html[data-nav='rail'] .fab,
+html[data-nav='rail-wide'] .fab {
+  bottom: max(18px, var(--safe-bottom));
+}
+
+/* Side rail: the bottom bar's replacement once there is room down the edge
+   instead of across the bottom -- the same translucent glass, just vertical
+   and full height. It also carries settings and the profile photo, which
+   PageHeader stops rendering while this is up. */
+
+.rail {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 30;
+  width: var(--rail-w);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: calc(12px + var(--safe-top)) 10px calc(12px + var(--safe-bottom));
+  border-right: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+}
+
+.rail--wide {
+  align-items: stretch;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.rail__mark {
+  flex: none;
+  font-size: 18px;
+}
+
+.rail--wide .rail__mark {
+  align-self: flex-start;
+}
+
+.rail__tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.rail__tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--glass-dim);
+}
+
+.rail--wide .rail__tab {
+  justify-content: flex-start;
+  padding: 8px 12px;
+}
+
+.rail__tab svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.rail__tab[aria-selected='true'] {
+  color: var(--glass-text);
+}
+
+.rail__label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rail__spacer {
+  flex: 1;
+}
+
+.rail__foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.rail--wide .rail__foot {
+  flex-direction: row;
+  align-self: flex-start;
 }
 
 /* Sections --------------------------------------------------------------- */
@@ -481,6 +630,38 @@ textarea {
   line-height: 1;
   text-transform: uppercase;
   color: var(--gold);
+}
+
+/* The iPhone Duo's outer display is wide but only ~466pt tall, and a hero
+   sized for a 390-wide phone eats more than half of that in landscape.
+   Trim the vertical rhythm rather than removing anything -- same threshold
+   Journey uses for the same squeeze, on the same display. */
+@media (max-height: 520px) {
+  .hero {
+    height: 180px;
+  }
+
+  /* A two-line title needs more room than this height has to spare --
+     without this, a long one pushes the kind label off the top, clipped by
+     .hero's overflow:hidden. */
+  .hero__title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .section {
+    margin-top: 14px;
+  }
+
+  .page-header + .section__title,
+  .page-header + .section,
+  .page-header + .backup,
+  .page-header + .hero,
+  .page-header + .empty,
+  .page-header + .show-list {
+    margin-top: 10px;
+  }
 }
 
 /* Three across rather than two, so a screenful shows roughly twice as many.

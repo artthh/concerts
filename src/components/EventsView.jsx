@@ -6,7 +6,16 @@ import PageHeader from './PageHeader.jsx'
 
 // The page title doubles as the category switcher: tapping "Concerts" opens
 // the three categories right where the heading is.
-export default function EventsView({ events, kind, onKind, counts, profilePhoto, onSettings, onOpen }) {
+export default function EventsView({
+  events,
+  kind,
+  onKind,
+  counts,
+  profilePhoto,
+  onSettings,
+  onOpen,
+  onRail,
+}) {
   const [open, setOpen] = useState(false)
   const sorted = sortByDate(events, 'asc')
 
@@ -17,7 +26,7 @@ export default function EventsView({ events, kind, onKind, counts, profilePhoto,
 
   return (
     <>
-      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings}>
+      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings} hideActions={onRail}>
       <div className="category">
         <button
           type="button"

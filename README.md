@@ -64,6 +64,30 @@ The `localStorage` keys still use the original `concerts.` prefix. Renaming
 them would orphan everyone's existing data for no benefit, so the prefix is
 deliberately left alone.
 
+### Wide screens and iPhone Duo
+
+The web has no way to tell the Duo's outer display from its inner one —
+466×678 and 669×951 are almost the same shape — so, as with Journey, the
+layout switches on viewport width alone (`src/lib/useNavMode.js`), live via
+`matchMedia` so unfolding or entering split view updates immediately rather
+than on the next reload:
+
+- **Below 440px** (a phone, or a split-view pane): the bottom bar, unchanged.
+- **440px and up** (the outer display, in either orientation): the bar
+  becomes a narrow icon-only rail down the left edge. Settings and the
+  profile photo move to its foot, since `PageHeader` stops rendering them —
+  the rail already carries both, and rendering them twice is what this bit
+  the gym app's own version of this feature.
+- **860px and up** (the inner display in landscape, and any wider window):
+  the rail widens and its tabs gain labels.
+
+Below 440 this is invisible. Above it, `.app`'s own `max-width` grows by
+exactly the rail's width, so the centred content column stays the same width
+it already was rather than getting narrower — it just sits to the right of
+the rail instead of dead-centre. A `max-height: 520px` query also trims the
+Home hero and section spacing, since the outer display is only ~466pt tall
+in landscape and a hero sized for a 390-wide phone would eat a third of it.
+
 **Events** is the main list: upcoming events, soonest first. The page title
 *is* the category switcher — tapping "Concerts" opens Concerts / Movies /
 Shows / Plans with a count each. Each card carries the photo on one edge — clipped to a
@@ -181,9 +205,11 @@ src/
     events.js               the event record, categories, date helpers, stats
     photos.js               crop/downscale + per-event photo storage
     i18n.js                 every UI string, date and money formatting
+    useNavMode.js           bar / rail / rail-wide, by viewport width
   components/
     PageHeader.jsx          title, settings and profile photo on one line
     BottomNav.jsx           floating translucent section bar
+    SideRail.jsx            the bar's replacement on wide screens / Duo
     Icons.jsx               inline line icons
     HomeView.jsx            hero for the next event, then the tile grid
     EventsView.jsx          upcoming events + the category switcher

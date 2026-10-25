@@ -89,13 +89,13 @@ function Tile({ event, onOpen }) {
 
 // The overview, and nothing else: the very next event large, then the ones
 // after it as a grid. The numbers live in History with the records they count.
-export default function HomeView({ events, profilePhoto, onSettings, onOpen }) {
+export default function HomeView({ events, profilePhoto, onSettings, onOpen, onRail }) {
   const upcoming = sortByDate(events.filter((e) => isUpcoming(e)), 'asc')
   const [next, ...rest] = upcoming
 
   return (
     <>
-      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings}>
+      <PageHeader profilePhoto={profilePhoto} onSettings={onSettings} hideActions={onRail}>
         <h1 className="page-title">{t('nextUp')}</h1>
       </PageHeader>
 
