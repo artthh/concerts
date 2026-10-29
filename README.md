@@ -66,14 +66,12 @@ deliberately left alone.
 
 ### Wide screens and iPhone Duo
 
-The web has no way to tell the Duo's outer display from its inner one —
-466×678 and 669×951 are almost the same shape — so, as with Journey, the
-layout switches on viewport width alone (`src/lib/useNavMode.js`), live via
-`matchMedia` so unfolding or entering split view updates immediately rather
-than on the next reload:
+The layout switches on viewport width alone (`src/lib/useNavMode.js`), live
+via `matchMedia` so unfolding or entering split view updates immediately
+rather than on the next reload:
 
 - **Below 440px** (a phone, or a split-view pane): the bottom bar, unchanged.
-- **440px and up** (the outer display, in either orientation): the bar
+- **440px and up** (the inner display, and any wider browser window): the bar
   becomes a narrow icon-only rail down the left edge. Settings and the
   profile photo move to its foot, since `PageHeader` stops rendering them —
   the rail already carries both, and rendering them twice is what this bit
@@ -81,16 +79,33 @@ than on the next reload:
 - **860px and up** (the inner display in landscape, and any wider window):
   the rail widens and its tabs gain labels.
 
-Below 440 this is invisible. Above it, `.app`'s own `max-width` grows by more
-than just the rail's width — a Duo panel is real extra space, worth spending
-on more of Home's tile grid rather than a wider gutter either side of the
-same phone-width column. The two targets land the outer display's landscape
-pose and the widest plain "rail" width close to edge-to-edge, and the inner
-display's landscape pose with only a sliver of margin, while still capping
-gracefully for an arbitrary desktop window. A `max-height: 520px` query also
-trims the Home hero and section spacing, since the outer display is only
-~466pt tall in landscape and a hero sized for a 390-wide phone would eat a
-third of it.
+The outer display stays in bar mode, and that is correct, not a bug: Safari
+on the Duo's outer display reserves a column on its right edge for system
+controls (time, battery, wifi) and keeps web content off it entirely, the
+way [WebKit's Jen Simmons described for Safari
+27.1](https://www.ithinkdiff.com/apple-safari-fix-iphone-duo-outer-display/).
+The width left for a page there is about 382pt in portrait and 368pt in
+landscape — [narrower than or about the same as an ordinary
+phone](https://ppc.land/safari-27-1-on-iphone-duo-runs-web-pages-from-382-to-951-pixels-wide/),
+not wider — so there is no extra space to move anything into in the first
+place. A native app can still put its own controls in that reserved column
+(UIKit's `UISceneAccessory`); there is no manifest field, meta tag, or other
+web API for it, and Apple has only said it is "investigating" opening that
+space up, with nothing shipped yet. Below 440 covering the outer display,
+then, is not a mis-tuned number to chase — it would stay a phone-sized canvas
+at any threshold, because that is what Safari actually gives a web page
+there today.
+
+Above 440, `.app`'s own `max-width` grows by more than just the rail's
+width — a Duo panel is real extra space, worth spending on more of Home's
+tile grid rather than a wider gutter either side of the same phone-width
+column. The two targets land the inner display's landscape pose close to
+edge-to-edge and the widest plain "rail" width with only a modest margin,
+while still capping gracefully for an arbitrary desktop window. A
+`max-height: 520px` query also trims the Home hero and section spacing: that
+one is keyed on height, not width, and the outer display's height is
+genuinely only ~466pt in landscape regardless of the width story above, so a
+hero sized for a 390-wide phone would still eat a third of it there.
 
 **Events** is the main list: upcoming events, soonest first. The page title
 *is* the category switcher — tapping "Concerts" opens Concerts / Movies /

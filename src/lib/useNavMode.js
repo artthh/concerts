@@ -1,15 +1,26 @@
 import { useEffect, useState } from 'react'
 
-// Where the navigation lives. The web has no way to tell the iPhone Duo's
-// outer display from its inner one -- 466x678 and 669x951 are almost the
-// same shape -- so, like Journey, the switch is on viewport width alone.
+// Where the navigation lives, by viewport width.
+//
+// This only ever actually promotes to a rail on the inner display (and a
+// plain wide window) -- not the outer one. Safari on the Duo's outer
+// display reserves a column on the right edge for its own system controls
+// (time, battery, wifi) and keeps web content off it entirely; the width a
+// page gets there is ~382pt in portrait and ~368pt in landscape, which is
+// narrower than or about the same as an ordinary phone, not wider. A native
+// app can still put its own controls in that reserved column (UIKit's
+// UISceneAccessory) -- a web page cannot, and there is no manifest field or
+// meta tag for it. Apple has said it is "investigating" opening that space
+// to web content, with no API or date given, so the outer display staying
+// in bar mode here is not a bug to chase: it is a phone-sized canvas today,
+// full stop, regardless of what number this threshold uses.
 //
 // Below 440 nothing changes: a phone at 390 and a split-view pane at 375
-// both keep the floating bottom bar. From 440 up the bar becomes a rail down
-// the left edge, in every pose, since that display is sometimes only ~466pt
-// tall and a bottom bar would eat a chunk of it. From 860 the rail widens
-// and its tabs gain labels, using the width the inner display has in
-// landscape.
+// both keep the floating bottom bar -- and so, for the reason above, does
+// the Duo's outer display. From 440 up the bar becomes a rail down the left
+// edge, which in practice means the inner display and a wide browser
+// window. From 860 the rail widens and its tabs gain labels, using the
+// width the inner display has in landscape.
 export const RAIL_BREAKPOINT = 440
 export const RAIL_WIDE_BREAKPOINT = 860
 

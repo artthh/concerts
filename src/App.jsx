@@ -58,19 +58,6 @@ export default function App() {
     document.documentElement.dataset.nav = navMode
   }, [navMode])
 
-  // TEMPORARY: the 440/860 breakpoints are a guess carried over from
-  // Journey, not a confirmed Duo spec -- this is here solely so a report of
-  // "still at the bottom" comes with the actual width to calibrate against,
-  // instead of another guess. Remove once that is confirmed.
-  const [viewport, setViewport] = useState(() => ({
-    w: window.innerWidth,
-    h: window.innerHeight,
-  }))
-  useEffect(() => {
-    const onResize = () => setViewport({ w: window.innerWidth, h: window.innerHeight })
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
 
   useEffect(() => {
     save(KEYS.concerts, withoutPhotos(events))
@@ -171,26 +158,6 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* TEMPORARY diagnostic -- see the comment above viewport's useState. */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 'calc(4px + env(safe-area-inset-top, 0px))',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 999,
-          background: 'rgba(220, 38, 38, 0.92)',
-          color: '#fff',
-          fontSize: 11,
-          fontWeight: 800,
-          padding: '4px 10px',
-          borderRadius: 999,
-          pointerEvents: 'none',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {viewport.w}×{viewport.h} · navMode={navMode}
-      </div>
       <main className="app__main">
         {section === 'home' && (
           <HomeView
