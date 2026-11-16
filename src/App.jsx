@@ -16,9 +16,8 @@ import { takeSharedEvent } from './lib/share.js'
 import { useNavMode } from './lib/useNavMode.js'
 import { t } from './lib/i18n.js'
 
-// Photos are kept in their own storage keys, so the events blob written on
-// every edit stays small. In memory each record carries its own photo.
-const withPhotos = (list) => list.map((e) => ({ ...e, photo: e.photo || getPhoto(e.id) }))
+// Photos are kept in their own store, so the events blob written on every
+// edit stays small. In memory each record carries its own photo.
 const withoutPhotos = (list) =>
   list.map((e) => {
     const copy = { ...e }
@@ -30,9 +29,7 @@ const withoutPhotos = (list) =>
 const SEARCHABLE_FROM = 8
 
 export default function App() {
-  const [events, setEvents] = useState(() =>
-    withPhotos(load(KEYS.concerts, []).map((e) => normalizeEvent(e))),
-  )
+  const [events, setEvents] = useState(() => load(KEYS.concerts, []).map((e) => normalizeEvent(e)))
   const [isDark, setIsDark] = useState(() => load(KEYS.theme, 'dark') !== 'light')
   // Home is the landing screen: it answers "what is next" across categories.
   const [section, setSection] = useState('home')
@@ -47,7 +44,7 @@ export default function App() {
   const [editing, setEditing] = useState(null) // event draft in the form sheet
   const [detail, setDetail] = useState(null) // event id open in the detail sheet
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [profilePhoto, setProfilePhoto] = useState(() => getPhoto(PROFILE_ID))
+  const [profilePhoto, setProfilePhoto] = useState('')
   const [toast, setToast] = useState('')
   // A link opened from someone else's share offers its event once, up front,
   // rather than dropping it straight into the list unasked.
@@ -63,6 +60,37 @@ export default function App() {
     document.documentElement.dataset.nav = navMode
   }, [navMode])
 
+  // Photos live in IndexedDB, which is async, so the events loaded from
+  // localStorage above start out without theirs; this fills them in once
+  // the store answers. A functional update, patching only the ids this
+  // fetched, so an event added or removed in the meantime isn't clobbered.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const pending = events.filter((e) => !e.photo)
+      const entries = await Promise.all(pending.map(async (e) => [e.id, await getPhoto(e.id)]))
+      if (cancelled) return
+      const photoById = new Map(entries.filter(([, photo]) => photo))
+      if (photoById.size === 0) return
+      setEvents((list) =>
+        list.map((e) => (photoById.has(e.id) ? { ...e, photo: photoById.get(e.id) } : e)),
+      )
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    getPhoto(PROFILE_ID).then((photo) => {
+      if (!cancelled) setProfilePhoto(photo)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     save(KEYS.concerts, withoutPhotos(events))

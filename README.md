@@ -308,12 +308,19 @@ crop instead of the tile being exact and the others severe, and it is the
 crop a person actually chose rather than an automatic centre-crop guessing
 for them.
 
-Photos are kept under one `concerts.photo.<id>` key each rather than inside the
-concerts blob, so editing a date rewrites a few hundred bytes instead of every
-photo. `localStorage` gives roughly 5 MB, which is about 60-65 photos; past that
-the app keeps the concert, drops the photo, and says so. If the history ever
-needs to grow beyond that, `src/lib/photos.js` is the only file to change —
-IndexedDB drops in behind the same four functions.
+Photos are kept in their own IndexedDB store (`src/lib/photos.js`), one
+record per event, rather than inside the concerts blob in `localStorage` --
+so editing a date rewrites a few hundred bytes instead of every photo, and
+the event list stays small enough that `localStorage`'s own ~5 MB cap is
+never in play for it. Photos used to live in `localStorage` too, directly
+under one `concerts.photo.<id>` key each, which meant a ceiling of about
+60-65 photos; past it the app kept the event and dropped the photo. Anyone
+who had already hit that ceiling gets moved over automatically the first
+time they open the updated app -- a one-time migration that copies each
+`concerts.photo.<id>` key into IndexedDB and clears it out of
+`localStorage`, freeing the quota that was the problem in the first place.
+IndexedDB's own ceiling is a share of the device's free disk space, normally
+gigabytes, so there is no practical photo limit left to design around.
 
 ## Sharing an event
 

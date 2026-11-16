@@ -1,11 +1,17 @@
 // Artist photos are cropped and downscaled in the browser before they are
 // stored, so a 4 MB camera roll picture becomes a ~50 KB card image.
 //
-// Photos live under one key per concert instead of inside the concerts blob:
-// that way editing a date rewrites a few hundred bytes rather than every
-// photo. This whole module is the seam to swap if we ever outgrow
-// localStorage — IndexedDB would drop in behind the same four functions.
-const PREFIX = 'concerts.photo.'
+// Photos live in their own IndexedDB store, one record per concert, rather
+// than inside the concerts blob or localStorage: localStorage caps out
+// around 5 MB (about 60-65 photos), a ceiling this app's own users have hit.
+// IndexedDB's limit is a share of free disk space -- normally gigabytes.
+// Anything already stored under the old `concerts.photo.<id>` localStorage
+// keys is moved over once, the first time this module runs after the
+// upgrade (see migrateFromLocalStorage below).
+const DB_NAME = 'concerts'
+const STORE = 'photos'
+const OLD_PREFIX = 'concerts.photo.'
+const MIGRATION_FLAG = 'concerts.photosMigratedToIdb'
 
 // Square, not the card panel's own aspect ratio: a photo is displayed at
 // several different ratios across the app (the diagonal card strip, a
@@ -23,17 +29,99 @@ export const PROFILE_SIZE = 220
 // Tried in order when storage is tight.
 const QUALITIES = [0.78, 0.6, 0.45]
 
-export function getPhoto(id) {
+let dbPromise = null
+function openDb() {
+  if (dbPromise) return dbPromise
+  dbPromise = new Promise((resolve, reject) => {
+    if (!globalThis.indexedDB) {
+      reject(new Error('IndexedDB unavailable'))
+      return
+    }
+    const request = indexedDB.open(DB_NAME, 1)
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains(STORE)) {
+        request.result.createObjectStore(STORE)
+      }
+    }
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => reject(request.error)
+  })
+  return dbPromise
+}
+
+async function idbGet(id) {
+  const db = await openDb()
+  return new Promise((resolve, reject) => {
+    const request = db.transaction(STORE, 'readonly').objectStore(STORE).get(id)
+    request.onsuccess = () => resolve(request.result || '')
+    request.onerror = () => reject(request.error)
+  })
+}
+
+async function idbSet(id, value) {
+  const db = await openDb()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite')
+    tx.objectStore(STORE).put(value, id)
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+}
+
+async function idbDelete(id) {
+  const db = await openDb()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite')
+    tx.objectStore(STORE).delete(id)
+    tx.oncomplete = () => resolve()
+    tx.onerror = () => reject(tx.error)
+  })
+}
+
+// Runs once per browser: anything left from before the IndexedDB move gets
+// copied over and cleared out of localStorage, which is the whole point --
+// freeing the quota that was the problem in the first place. Every public
+// function below awaits this first, so nothing can read or write photos
+// while a migration might still be half-done. If it fails partway (a quota
+// or IndexedDB error), the flag never gets set and the next call tries
+// again rather than losing the rest of the photos silently.
+let migratePromise = null
+function migrateFromLocalStorage() {
+  if (migratePromise) return migratePromise
+  migratePromise = (async () => {
+    try {
+      if (localStorage.getItem(MIGRATION_FLAG)) return
+      const keys = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key && key.startsWith(OLD_PREFIX)) keys.push(key)
+      }
+      for (const key of keys) {
+        const value = localStorage.getItem(key)
+        if (value) await idbSet(key.slice(OLD_PREFIX.length), value)
+        localStorage.removeItem(key)
+      }
+      localStorage.setItem(MIGRATION_FLAG, '1')
+    } catch {
+      // Best effort -- the flag stays unset, so this runs again next time.
+    }
+  })()
+  return migratePromise
+}
+
+export async function getPhoto(id) {
+  await migrateFromLocalStorage()
   try {
-    return localStorage.getItem(PREFIX + id) || ''
+    return (await idbGet(id)) || ''
   } catch {
     return ''
   }
 }
 
-export function removePhoto(id) {
+export async function removePhoto(id) {
+  await migrateFromLocalStorage()
   try {
-    localStorage.removeItem(PREFIX + id)
+    await idbDelete(id)
   } catch {
     // ignore
   }
@@ -41,28 +129,30 @@ export function removePhoto(id) {
 
 // Returns true when the photo landed, false when every quality blew the quota.
 export async function storePhoto(id, dataUrl, options = {}) {
+  await migrateFromLocalStorage()
   if (!dataUrl) {
-    removePhoto(id)
+    await removePhoto(id)
     return true
   }
   for (const quality of [null, ...QUALITIES.slice(1)]) {
     const candidate =
       quality === null ? dataUrl : await preparePhoto(dataUrl, { ...options, quality })
     try {
-      localStorage.setItem(PREFIX + id, candidate)
+      await idbSet(id, candidate)
       return true
     } catch {
       // Quota: fall through and try a smaller re-encode.
     }
   }
-  removePhoto(id)
+  await removePhoto(id)
   return false
 }
 
-export function listPhotos(ids) {
+export async function listPhotos(ids) {
+  await migrateFromLocalStorage()
   const out = {}
   for (const id of ids) {
-    const photo = getPhoto(id)
+    const photo = await getPhoto(id)
     if (photo) out[id] = photo
   }
   return out
