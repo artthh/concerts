@@ -3,6 +3,15 @@
 // Newest first. Add a new entry at the top the next time something ships.
 export const CHANGELOG = [
   {
+    version: 12,
+    date: '2026-11-16',
+    title: 'Short share links with a real preview',
+    items: [
+      'Shared event links are now short (/s/<id>) and show a proper preview card in Messages/WhatsApp -- title, venue/date, and the photo',
+      "Works without any server set up too -- it just falls back to the older, longer self-contained link",
+    ],
+  },
+  {
     version: 11,
     date: '2026-11-16',
     title: 'Release history, and photos in shared links',

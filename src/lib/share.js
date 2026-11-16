@@ -1,24 +1,31 @@
-// Sharing one event as a link, since there is no backend to hand it to
-// instead. The payload is the event itself, minus its id and timestamps (the
-// recipient's copy gets its own, so editing or deleting it on either side
-// never touches the other's). It rides in the URL's hash, which the browser
-// never sends to a server -- fitting for an app with none.
+// Sharing one event as a link. The payload is the event itself, minus its id
+// and timestamps (the recipient's copy gets its own, so editing or deleting
+// it on either side never touches the other's).
+//
+// The link handed to navigator.share()/the clipboard is a short /s/<id> --
+// a tiny server function (api/share.js, api/s/[id].js) stores the event and
+// serves that id back a proper Open Graph preview, so Messages/WhatsApp show
+// a real card (title, venue, photo) instead of a wall of link text. If that
+// request fails for any reason -- offline, the server storage not set up --
+// this falls back to the older link form, the whole payload encoded straight
+// into the URL's hash, which needs no server at all to open.
 import { normalizeEvent } from './events.js'
 import { preparePhoto } from './photos.js'
 
-const HASH_KEY = 'share'
+const HASH_KEY = 'share' // legacy, fully self-contained link
+const SHORT_HASH_KEY = 'shared' // short link's id, resolved via the server
 
-// The photo already stored locally (640x640, quality 0.78) would make the
-// link itself enormous, so it is shrunk further just for the share -- still
-// recognisable, but a link someone can actually paste or hand to a share
-// sheet.
+// The photo already stored locally (640x640, quality 0.78) would make even
+// the fallback link enormous, so it is shrunk further just for sharing --
+// still recognisable, but reasonable to paste or hand to a share sheet.
 const SHARE_PHOTO_SIZE = 320
 const SHARE_PHOTO_QUALITY = 0.5
 
-// A pathological photo that barely compresses could still blow this up; past
-// it, the share goes out without the photo rather than producing a link
-// nothing can open.
-const MAX_SHARE_URL_LENGTH = 300000
+// Only matters for the fallback link below -- the short link never puts the
+// photo in the URL at all. A pathological photo that barely compresses
+// could still blow this up; past it, the fallback goes out without the
+// photo rather than producing a link nothing can open.
+const MAX_FALLBACK_URL_LENGTH = 300000
 
 // Plain btoa() only handles Latin-1, so an emoji or an accented venue name
 // breaks it; a URL also needs -_ and no padding, not the +/= a plain
@@ -39,6 +46,16 @@ function decodeBase64Url(encoded) {
   return new TextDecoder().decode(bytes)
 }
 
+function buildFallbackUrl(shareable) {
+  const url = new URL(window.location.href)
+  let encoded = encodeBase64Url(JSON.stringify(shareable))
+  if (encoded.length > MAX_FALLBACK_URL_LENGTH && shareable.photo) {
+    encoded = encodeBase64Url(JSON.stringify({ ...shareable, photo: '' }))
+  }
+  url.hash = `${HASH_KEY}=${encoded}`
+  return url.toString()
+}
+
 export async function buildShareUrl(event) {
   const shareable = { ...event }
   delete shareable.id
@@ -57,29 +74,55 @@ export async function buildShareUrl(event) {
     }
   }
 
-  const url = new URL(window.location.href)
-  let encoded = encodeBase64Url(JSON.stringify(shareable))
-  if (encoded.length > MAX_SHARE_URL_LENGTH && shareable.photo) {
-    shareable.photo = ''
-    encoded = encodeBase64Url(JSON.stringify(shareable))
+  try {
+    const response = await fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(shareable),
+    })
+    if (!response.ok) throw new Error('share request failed')
+    const { id } = await response.json()
+    if (!id) throw new Error('no id returned')
+    const url = new URL(window.location.href)
+    url.hash = ''
+    url.pathname = `/s/${id}`
+    return url.toString()
+  } catch {
+    return buildFallbackUrl(shareable)
   }
-  url.hash = `${HASH_KEY}=${encoded}`
-  return url.toString()
 }
 
-// Reads a shared event out of the current URL, if there is one. Clears the
-// hash either way, so a stale share link sitting in the address bar does
-// not re-offer itself on every reload. Returns null for anything that
-// fails to decode rather than throwing -- a mangled link (a messaging app
-// that truncated it, say) should just land on a normal, empty launch.
-export function takeSharedEvent() {
+// Reads a shared event out of the current URL, if there is one -- either the
+// short #shared=<id> form (fetched from the server) or the older, fully
+// self-contained #share=<payload> form from before short links existed.
+// Clears the hash either way, so a stale link sitting in the address bar
+// does not re-offer itself on every reload. Resolves to null for anything
+// that fails to decode or fetch -- a mangled or expired link should just
+// land on a normal, empty launch.
+export async function takeSharedEvent() {
   const hash = window.location.hash.replace(/^#/, '')
-  if (!hash.startsWith(`${HASH_KEY}=`)) return null
-  const encoded = hash.slice(HASH_KEY.length + 1)
-  window.history.replaceState(null, '', window.location.pathname + window.location.search)
-  try {
-    return normalizeEvent(JSON.parse(decodeBase64Url(encoded)))
-  } catch {
-    return null
+
+  if (hash.startsWith(`${SHORT_HASH_KEY}=`)) {
+    const id = decodeURIComponent(hash.slice(SHORT_HASH_KEY.length + 1))
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    try {
+      const response = await fetch(`/api/share/${encodeURIComponent(id)}`)
+      if (!response.ok) return null
+      return normalizeEvent(await response.json())
+    } catch {
+      return null
+    }
   }
+
+  if (hash.startsWith(`${HASH_KEY}=`)) {
+    const encoded = hash.slice(HASH_KEY.length + 1)
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    try {
+      return normalizeEvent(JSON.parse(decodeBase64Url(encoded)))
+    } catch {
+      return null
+    }
+  }
+
+  return null
 }

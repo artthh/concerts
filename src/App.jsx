@@ -50,7 +50,7 @@ export default function App() {
   const [toast, setToast] = useState('')
   // A link opened from someone else's share offers its event once, up front,
   // rather than dropping it straight into the list unasked.
-  const [incomingShare, setIncomingShare] = useState(() => takeSharedEvent())
+  const [incomingShare, setIncomingShare] = useState(null)
   // iPhone Duo and anything else wide enough: the bottom bar becomes a side
   // rail instead of staying fixed to the bottom, the same switch Journey
   // makes, and for the same reason -- a bottom bar eats real height on a
@@ -88,6 +88,19 @@ export default function App() {
     let cancelled = false
     getPhoto(PROFILE_ID).then((photo) => {
       if (!cancelled) setProfilePhoto(photo)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // A short share link only carries an id; this is what turns it into the
+  // event to offer, one way or another (fetched from the server, or decoded
+  // right here for the older, fully self-contained link form).
+  useEffect(() => {
+    let cancelled = false
+    takeSharedEvent().then((shared) => {
+      if (!cancelled) setIncomingShare(shared)
     })
     return () => {
       cancelled = true

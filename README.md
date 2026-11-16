@@ -184,14 +184,24 @@ npm run icons    # regenerate the PNG app icons (needs a local Chrome/Chromium)
 
 ## Deploying
 
-The build output is a static `dist/` folder, so any static host works. For v0 /
-Vercel, import this repo and keep the defaults:
+The app itself is a static `dist/` folder, so any static host works for it on
+its own. Deployed to Vercel, keep the defaults:
 
 | Setting          | Value           |
 | ---------------- | --------------- |
 | Framework preset | Vite            |
 | Build command    | `npm run build` |
 | Output directory | `dist`          |
+
+`api/` holds the one piece that isn't static: three small serverless
+functions behind the Share button (see "Sharing an event" below), which need
+a Vercel Blob store connected to the project -- **Storage → Create Database
+→ Blob → Connect to Project** -- which sets the `BLOB_READ_WRITE_TOKEN`
+environment variable the functions read. `vercel.json`'s rewrites send `/s/:id`
+to the one of those that renders a link preview; everything else still falls
+through to `index.html` the way a single-page app needs. None of this is
+required to run the app -- without it, the Share button still works, just
+back to the longer, self-contained link form it used before this existed.
 
 ## Add it to your phone's home screen
 
@@ -325,31 +335,42 @@ gigabytes, so there is no practical photo limit left to design around.
 
 ## Sharing an event
 
-The Share button on an event's detail screen builds a link that carries the
-event itself, not a reference to it — there is no backend to look it up on.
-The event's fields (minus its id and timestamps, so the copy that gets added
-is entirely its own) are JSON-encoded and tucked into the URL's hash, which
-browsers never send to a server. `navigator.share` hands that link to
-whatever the person picks (Messages, WhatsApp, ...); where that isn't
-available, it's copied to the clipboard instead.
+The Share button on an event's detail screen hands `navigator.share` a short
+link, `/s/<id>` — a tiny serverless function (`api/share.js`,
+`api/share/[id].js`, `api/s/[id].js`, backed by Vercel Blob) stores the event
+behind that id, rather than the link carrying the whole event itself. That's
+what makes the link short, and what lets it carry a real Open Graph preview
+(title, venue/date, and the photo) that Messages/WhatsApp can actually render
+as a card: their crawlers fetch the link directly and only ever see
+`api/s/[id].js`'s plain HTML, never the app's own JavaScript, so the preview
+has to come from the server, not the client. `/s/<id>` immediately redirects
+a real visitor on to the app itself (`/#shared=<id>`), which fetches the
+event back as JSON and takes it from there. A share's stored Blob entry is
+given a 30-day TTL and simply stops existing after that -- there's no cron
+job or expiry flag to keep in sync, an expired link just looks exactly like
+one that was never valid.
 
-The photo rides along too, but not the full-size one stored locally — it is
-shrunk further first (320×320, a lower JPEG quality) just for the link,
-since the stored version would make the link itself unreasonably long. A
-photo that still barely compresses past a generous length cap is dropped
-rather than producing a link nothing can open; everything else still goes
-through.
+If creating that short link fails for any reason — offline, the Blob store
+not set up yet (see "Deploying" above) — the Share button falls back to the
+older link form instead: the event's fields (minus its id and timestamps, so
+the copy that gets added is entirely its own) JSON-encoded straight into the
+URL's hash, which browsers never send to a server, so it needs nothing
+deployed to work. The photo rides along there too, but shrunk further first
+(320×320, a lower JPEG quality) since the full-size stored version would
+make a self-contained link unreasonably long; a photo that still barely
+compresses past a generous length cap is dropped rather than producing a
+link nothing can open.
 
-Opening the link previews the event (photo included, if it has one) and
-offers to add it. Accepting runs it through the same `normalizeEvent()`
-every import and form save goes through, which is also where it picks up
-its own fresh id and timestamps — so from that point on it is a completely
+Opening either link form previews the event (photo included, if it has one)
+and offers to add it. Accepting runs it through the same `normalizeEvent()`
+every import and form save goes through, which is also where it picks up its
+own fresh id and timestamps — so from that point on it is a completely
 independent record: editing or deleting it on either end never touches the
 other's copy, and the photo is stored into this device's own IndexedDB the
 same way a photo added by hand would be. This is a one-time copy, not live
 sync; the two events only stay in step for as long as nobody touches either
-one. A mangled or truncated link (some messaging apps clip very long URLs)
-just fails to decode and the app opens normally, with nothing offered.
+one. A mangled, expired, or truncated link just fails to resolve and the app
+opens normally, with nothing offered.
 
 ## Release history
 
