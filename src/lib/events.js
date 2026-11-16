@@ -263,27 +263,25 @@ export function matchesQuery(event, query) {
   return haystack.includes(q)
 }
 
-// Venues you have already typed, so they can be picked instead of retyped.
-// Ones used for this category come first -- a cinema is a useful suggestion for
-// a movie and noise for a concert -- then by how often, then by how recently.
-export function venueSuggestions(events, kind, limit = 6) {
+// Venues you have already typed for this same category, so they can be
+// picked instead of retyped -- a cinema is a useful suggestion for a movie
+// and noise for a concert, so venues from other categories are left out
+// entirely rather than just sorted last.
+export function venueSuggestions(events, kind, limit = 20) {
   const seen = new Map()
   for (const event of events) {
+    if (event.kind !== kind) continue
     const venue = String(event.venue || '').trim()
     if (!venue) continue
-    const entry = seen.get(venue) || { venue, count: 0, latest: '', sameKind: false }
+    const entry = seen.get(venue) || { venue, count: 0, latest: '' }
     entry.count += 1
     if (String(event.date || '') > entry.latest) entry.latest = String(event.date || '')
-    if (event.kind === kind) entry.sameKind = true
     seen.set(venue, entry)
   }
   return [...seen.values()]
     .sort(
       (a, b) =>
-        Number(b.sameKind) - Number(a.sameKind) ||
-        b.count - a.count ||
-        b.latest.localeCompare(a.latest) ||
-        a.venue.localeCompare(b.venue),
+        b.count - a.count || b.latest.localeCompare(a.latest) || a.venue.localeCompare(b.venue),
     )
     .slice(0, limit)
     .map((entry) => entry.venue)

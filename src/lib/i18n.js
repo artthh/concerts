@@ -110,7 +110,7 @@ const STRINGS = {
 
   emoji: 'Emoji',
   emojiHint: 'Shown next to the name on the cards.',
-  venueReuseHint: 'Tap one you have used before.',
+  venuePickPlaceholder: 'Choose a place you have used before',
   photo: 'Photo',
   photoHint: 'Drag to centre, pinch or use the slider to zoom.',
   addPhoto: 'Choose photo',

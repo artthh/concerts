@@ -1542,7 +1542,12 @@ html[data-nav='rail-wide'] .fab {
 .modal__actions {
   display: flex;
   gap: 10px;
-  margin-top: 6px;
+  position: sticky;
+  bottom: 0;
+  margin: 6px -16px 0;
+  padding: 10px 16px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
 }
 
 .shared-preview {
@@ -1717,24 +1722,8 @@ html[data-nav='rail-wide'] .fab {
   border: none;
 }
 
-.venue-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.venue-chips .chip-button {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.venue-chips .chip-button[aria-pressed='true'] {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent);
+.venue-select {
+  margin-bottom: 8px;
 }
 
 .form-extras {

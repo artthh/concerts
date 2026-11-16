@@ -175,40 +175,25 @@ export default function EventForm({ event, defaultKind, events, onSave, onClose,
           <label className="field__label" htmlFor="venue">
             {t(`venueLabel_${draft.kind}`)}
           </label>
-          <input
-            id="venue"
-            className="input"
-            list="venue-options"
-            value={draft.venue}
-            onChange={set('venue')}
-          />
-          {/* The datalist helps while typing; the chips are for picking with a
-              thumb, which is how this actually gets used on a phone. */}
-          <datalist id="venue-options">
-            {venues.map((venue) => (
-              <option key={venue} value={venue} />
-            ))}
-          </datalist>
           {venues.length > 0 && (
-            <>
-              <div className="venue-chips">
-                {venues.map((venue) => (
-                  <button
-                    key={venue}
-                    type="button"
-                    className="chip-button"
-                    aria-pressed={draft.venue === venue}
-                    onClick={() =>
-                      setDraft((d) => ({ ...d, venue: d.venue === venue ? '' : venue }))
-                    }
-                  >
-                    {venue}
-                  </button>
-                ))}
-              </div>
-              <div className="field__hint">{t('venueReuseHint')}</div>
-            </>
+            <select
+              className="select venue-select"
+              value=""
+              aria-label={t('venuePickPlaceholder')}
+              onChange={(pickEvent) => {
+                const picked = pickEvent.target.value
+                if (picked) setDraft((d) => ({ ...d, venue: picked }))
+              }}
+            >
+              <option value="">{t('venuePickPlaceholder')}</option>
+              {venues.map((venue) => (
+                <option key={venue} value={venue}>
+                  {venue}
+                </option>
+              ))}
+            </select>
           )}
+          <input id="venue" className="input" value={draft.venue} onChange={set('venue')} />
         </div>
 
         {hasExtras && (

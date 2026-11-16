@@ -52,10 +52,11 @@ tile and the hero, and the corner opposite the photo on the list cards. It is
 absent until the original date has passed: the birth itself is not a
 birthday.
 
-The venue field suggests places already used, as tappable chips and as a
-`datalist` for typing. Venues used for the category being added rank first — a
-cinema is a useful suggestion for a movie and noise for a concert — then by how
-often, then by how recently.
+The venue field suggests places already used, as a dropdown next to the text
+field — picking one just fills it in, so it is still a plain text field
+underneath. Only venues used for the category being added show up at all: a
+cinema is a useful suggestion for a movie and noise for a concert, so the
+other categories' venues are left out rather than just ranked lower.
 
 ## The three sections
 
