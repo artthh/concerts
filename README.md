@@ -34,14 +34,18 @@ what lets an anniversary know it is the 30th, and it means the record never has
 to be edited as the years go by.
 
 Anniversaries are always yearly; there is no picker for them. Plans get one:
-once, every year, every month or every two weeks — so **payday is a repeating
-plan**, not a category of its own. Anything that recurs on a schedule but is
-not about a count of years belongs there.
+once, every year, every month, every two weeks, or **payday** — the 15th and
+the last day of the month, each pulled back to the Friday before whenever it
+lands on a weekend, since that is the one real-world rule worth a repeat of
+its own rather than making do with "every month." Anything that recurs on a
+schedule but is not about a count of years belongs under Plans.
 
 A repeating event is always upcoming: the day after it happens it rolls to the
 next occurrence rather than dropping into History. Feb 29 lands on Feb 28 in a
-common year, and a monthly event on the 31st lands on the last day of a short
-month.
+common year, a monthly event on the 31st lands on the last day of a short
+month, and if payday's weekend-adjusted date has already passed, the next one
+is next month's — checking on the Saturday or Sunday a payday just moved off
+of does not re-show the one that already happened.
 
 For anniversaries the ordinal — 30th, 7th — rides the top corner of the Home
 tile and the hero, and the corner opposite the photo on the list cards. It is

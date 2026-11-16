@@ -8,7 +8,7 @@
 //     id:         string        stable local id
 //     kind:       'concert' | 'movie' | 'show' | 'plan' | 'anniversary'
 //     title:      string        artist, film, show, plan or person (required)
-//     repeat:     'none' | 'yearly' | 'monthly' | 'biweekly'
+//     repeat:     'none' | 'yearly' | 'monthly' | 'biweekly' | 'semimonthly'
 //     emoji:      string        shown after the title on the cards
 //     photo:      string        cropped photo as a data URL
 //     venue:      string        where it happens -- shown on every card
@@ -29,7 +29,7 @@
 export const KINDS = ['concert', 'movie', 'show', 'plan', 'anniversary']
 export const DEFAULT_KIND = 'concert'
 
-export const REPEATS = ['none', 'yearly', 'monthly', 'biweekly']
+export const REPEATS = ['none', 'yearly', 'monthly', 'biweekly', 'semimonthly']
 
 // An anniversary is a birthday or a yearly celebration: it always repeats, and
 // the point of it is which one this is -- the 30th, the 7th.
@@ -134,6 +134,17 @@ const iso = (y, m, d) =>
 
 const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate()
 
+// A day of the month, pulled back to the Friday before whenever it lands on
+// a weekend -- payday, not a calendar date. Never crosses into the previous
+// month: the 15th and the last day are both far enough from the 1st that
+// subtracting up to two days always stays put.
+function nearestWeekday(year, month, day) {
+  const d = new Date(year, month, day)
+  if (d.getDay() === 6) d.setDate(d.getDate() - 1)
+  else if (d.getDay() === 0) d.setDate(d.getDate() - 2)
+  return iso(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
 // The date this event is actually counting to. A one-off counts to its own
 // date; a repeating one counts to its next occurrence on or after today, so a
 // birthday never falls into the past.
@@ -161,6 +172,24 @@ export function nextOccurrence(event, today = todayISO()) {
     for (let step = 0; step < 24; step++) {
       const candidate = iso(y, m, Math.min(day, daysInMonth(y, m)))
       if (candidate >= today) return candidate
+      m += 1
+      if (m > 11) { m = 0; y += 1 }
+    }
+    return date
+  }
+
+  if (repeat === 'semimonthly') {
+    // Payday: the 15th and the last day of the month, each pulled back to
+    // the Friday before when it falls on a weekend. The 15th's adjusted
+    // date is always before the last day's, so checking them in that order
+    // within a month keeps candidates in date order.
+    let y = Number(today.slice(0, 4))
+    let m = Number(today.slice(5, 7)) - 1
+    for (let step = 0; step < 24; step++) {
+      for (const target of [15, daysInMonth(y, m)]) {
+        const candidate = nearestWeekday(y, m, target)
+        if (candidate >= today) return candidate
+      }
       m += 1
       if (m > 11) { m = 0; y += 1 }
     }

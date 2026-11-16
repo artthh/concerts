@@ -87,7 +87,10 @@ const STRINGS = {
   repeat_yearly: 'Every year',
   repeat_monthly: 'Every month',
   repeat_biweekly: 'Every 2 weeks',
+  repeat_semimonthly: 'Payday (15th & month-end)',
   repeatHint: 'A repeating event never leaves the countdown — it just rolls to the next one.',
+  repeatHint_semimonthly:
+    'On the 15th and the last day of the month — pulled back to the Friday before whenever one lands on a weekend.',
   originDateLabel: 'First date',
   originDateHint_anniversary: 'The birth or the first year. The number is counted from here.',
   originDateHint: 'The first time it happens. The countdown rolls forward from here.',

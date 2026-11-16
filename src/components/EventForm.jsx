@@ -163,7 +163,11 @@ export default function EventForm({ event, defaultKind, events, onSave, onClose,
                 </button>
               ))}
             </div>
-            {draft.repeat !== 'none' && <div className="field__hint">{t('repeatHint')}</div>}
+            {draft.repeat !== 'none' && (
+              <div className="field__hint">
+                {draft.repeat === 'semimonthly' ? t('repeatHint_semimonthly') : t('repeatHint')}
+              </div>
+            )}
           </div>
         )}
 
