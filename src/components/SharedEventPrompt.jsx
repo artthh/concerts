@@ -8,9 +8,13 @@ export default function SharedEventPrompt({ event, onAccept, onDiscard }) {
   return (
     <Modal title={t('sharedEventTitle')} onClose={onDiscard} closeLabel={t('close')}>
       <div className="shared-preview">
-        <span className="shared-preview__icon" aria-hidden="true">
-          {t(`kindIcon_${event.kind}`)}
-        </span>
+        {event.photo ? (
+          <img className="shared-preview__photo" src={event.photo} alt="" />
+        ) : (
+          <span className="shared-preview__icon" aria-hidden="true">
+            {t(`kindIcon_${event.kind}`)}
+          </span>
+        )}
         <div className="shared-preview__body">
           <span className="shared-preview__name">
             {event.title}

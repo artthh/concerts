@@ -11,6 +11,7 @@ export default function SettingsView({
   onProfilePhoto,
   onImport,
   onToast,
+  onChangelog,
 }) {
   return (
     <>
@@ -54,6 +55,13 @@ export default function SettingsView({
             {t('installBody')}
           </p>
         </div>
+      </section>
+
+      <section className="section">
+        <h2 className="section__title">{t('releaseHistory')}</h2>
+        <button type="button" className="button" onClick={onChangelog}>
+          {t('releaseHistoryOpen')}
+        </button>
       </section>
     </>
   )

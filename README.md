@@ -327,18 +327,35 @@ gigabytes, so there is no practical photo limit left to design around.
 
 The Share button on an event's detail screen builds a link that carries the
 event itself, not a reference to it — there is no backend to look it up on.
-The event's fields (minus its photo, too big for a URL or a messaging app,
-and minus its id and timestamps, so the copy that gets added is entirely its
-own) are JSON-encoded and tucked into the URL's hash, which browsers never
-send to a server. `navigator.share` hands that link to whatever the person
-picks (Messages, WhatsApp, ...); where that isn't available, it's copied to
-the clipboard instead.
+The event's fields (minus its id and timestamps, so the copy that gets added
+is entirely its own) are JSON-encoded and tucked into the URL's hash, which
+browsers never send to a server. `navigator.share` hands that link to
+whatever the person picks (Messages, WhatsApp, ...); where that isn't
+available, it's copied to the clipboard instead.
 
-Opening the link previews the event and offers to add it. Accepting runs it
-through the same `normalizeEvent()` every import and form save goes through,
-which is also where it picks up its own fresh id and timestamps — so from
-that point on it is a completely independent record: editing or deleting it
-on either end never touches the other's copy. This is a one-time copy, not
-live sync; the two events only stay in step for as long as nobody touches
-either one. A mangled or truncated link (some messaging apps clip very long
-URLs) just fails to decode and the app opens normally, with nothing offered.
+The photo rides along too, but not the full-size one stored locally — it is
+shrunk further first (320×320, a lower JPEG quality) just for the link,
+since the stored version would make the link itself unreasonably long. A
+photo that still barely compresses past a generous length cap is dropped
+rather than producing a link nothing can open; everything else still goes
+through.
+
+Opening the link previews the event (photo included, if it has one) and
+offers to add it. Accepting runs it through the same `normalizeEvent()`
+every import and form save goes through, which is also where it picks up
+its own fresh id and timestamps — so from that point on it is a completely
+independent record: editing or deleting it on either end never touches the
+other's copy, and the photo is stored into this device's own IndexedDB the
+same way a photo added by hand would be. This is a one-time copy, not live
+sync; the two events only stay in step for as long as nobody touches either
+one. A mangled or truncated link (some messaging apps clip very long URLs)
+just fails to decode and the app opens normally, with nothing offered.
+
+## Release history
+
+Settings has a "Release history" entry: a short, plain-English summary of
+what has shipped and when, grouped into numbered releases (`src/lib/
+changelog.js`). It isn't generated from the commit log -- it's a curated
+list of the things someone using the app would actually notice, newest
+first. The convention is to add a new entry at the top of that file right
+before whatever it describes ships to `main`.

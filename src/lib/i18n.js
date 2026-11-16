@@ -24,7 +24,7 @@ const STRINGS = {
   shareLinkCopied: 'Link copied',
   shareFailed: 'Could not share this event',
   sharedEventTitle: 'Shared event',
-  sharedEventHint: "This adds a copy to your own list. It won't stay in sync with theirs, and the photo isn't included yet.",
+  sharedEventHint: "This adds a copy to your own list. It won't stay in sync with theirs.",
   addSharedEvent: 'Add to my events',
   shareAccepted: 'Added to your events',
   discard: 'Discard',
@@ -175,6 +175,8 @@ const STRINGS = {
   storageNote: 'Everything is stored on this device. Export a backup before switching phones.',
   installTitle: 'Add to home screen',
   installBody: 'Safari: Share → Add to Home Screen. Chrome: menu → Add to Home screen.',
+  releaseHistory: 'Release history',
+  releaseHistoryOpen: 'See what shipped',
 }
 
 export function t(key, vars) {

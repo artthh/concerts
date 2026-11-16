@@ -8,6 +8,7 @@ import SettingsView from './components/SettingsView.jsx'
 import EventForm from './components/EventForm.jsx'
 import EventDetail from './components/EventDetail.jsx'
 import SharedEventPrompt from './components/SharedEventPrompt.jsx'
+import ChangelogView from './components/ChangelogView.jsx'
 import Modal from './components/Modal.jsx'
 import { KEYS, load, save } from './lib/storage.js'
 import { PROFILE_ID, PROFILE_SIZE, getPhoto, removePhoto, storePhoto } from './lib/photos.js'
@@ -44,6 +45,7 @@ export default function App() {
   const [editing, setEditing] = useState(null) // event draft in the form sheet
   const [detail, setDetail] = useState(null) // event id open in the detail sheet
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [changelogOpen, setChangelogOpen] = useState(false)
   const [profilePhoto, setProfilePhoto] = useState('')
   const [toast, setToast] = useState('')
   // A link opened from someone else's share offers its event once, up front,
@@ -163,10 +165,12 @@ export default function App() {
     if (!stored) setToast(t('photoNotSaved'))
   }
 
-  function acceptSharedEvent() {
-    setEvents((list) => [...list, incomingShare])
+  async function acceptSharedEvent() {
+    const storedPhoto = await storePhoto(incomingShare.id, incomingShare.photo)
+    const saved = storedPhoto ? incomingShare : { ...incomingShare, photo: '' }
+    setEvents((list) => [...list, saved])
     setIncomingShare(null)
-    setToast(t('shareAccepted'))
+    setToast(storedPhoto ? t('shareAccepted') : t('photoNotSaved'))
   }
 
   function discardSharedEvent() {
@@ -306,7 +310,18 @@ export default function App() {
             onProfilePhoto={saveProfilePhoto}
             onImport={importEvents}
             onToast={setToast}
+            onChangelog={() => setChangelogOpen(true)}
           />
+        </Modal>
+      )}
+
+      {changelogOpen && (
+        <Modal
+          title={t('releaseHistory')}
+          onClose={() => setChangelogOpen(false)}
+          closeLabel={t('close')}
+        >
+          <ChangelogView />
         </Modal>
       )}
 

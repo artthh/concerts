@@ -112,7 +112,7 @@ export default function EventDetail({ event, onEdit, onDelete, onClose, onToast 
   // ...); where that is not available, the link is copied instead, since a
   // link with nowhere to paste it is useless.
   async function handleShare() {
-    const url = buildShareUrl(event)
+    const url = await buildShareUrl(event)
     const shareData = { title: event.title, text: t('shareMessage', { title: event.title, appName: t('appName') }), url }
     if (navigator.share) {
       try {

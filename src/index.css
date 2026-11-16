@@ -1569,6 +1569,15 @@ html[data-nav='rail-wide'] .fab {
   background: var(--card-2);
 }
 
+.shared-preview__photo {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+}
+
 .shared-preview__body {
   display: flex;
   flex-direction: column;
@@ -1582,6 +1591,59 @@ html[data-nav='rail-wide'] .fab {
 .shared-preview__meta {
   font-size: 12px;
   color: var(--text-3);
+}
+
+.changelog {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.changelog__entry {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.changelog__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.changelog__version {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.changelog__date {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.changelog__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.changelog__items {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.changelog__items li + li {
+  margin-top: 4px;
 }
 
 .photo-picker {
