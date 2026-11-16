@@ -7,10 +7,12 @@ import HistoryView from './components/HistoryView.jsx'
 import SettingsView from './components/SettingsView.jsx'
 import EventForm from './components/EventForm.jsx'
 import EventDetail from './components/EventDetail.jsx'
+import SharedEventPrompt from './components/SharedEventPrompt.jsx'
 import Modal from './components/Modal.jsx'
 import { KEYS, load, save } from './lib/storage.js'
 import { PROFILE_ID, PROFILE_SIZE, getPhoto, removePhoto, storePhoto } from './lib/photos.js'
 import { DEFAULT_KIND, KINDS, isUpcoming, matchesQuery, normalizeEvent } from './lib/events.js'
+import { takeSharedEvent } from './lib/share.js'
 import { useNavMode } from './lib/useNavMode.js'
 import { t } from './lib/i18n.js'
 
@@ -47,6 +49,9 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [profilePhoto, setProfilePhoto] = useState(() => getPhoto(PROFILE_ID))
   const [toast, setToast] = useState('')
+  // A link opened from someone else's share offers its event once, up front,
+  // rather than dropping it straight into the list unasked.
+  const [incomingShare, setIncomingShare] = useState(() => takeSharedEvent())
   // iPhone Duo and anything else wide enough: the bottom bar becomes a side
   // rail instead of staying fixed to the bottom, the same switch Journey
   // makes, and for the same reason -- a bottom bar eats real height on a
@@ -128,6 +133,16 @@ export default function App() {
     })
     setProfilePhoto(stored ? photo : '')
     if (!stored) setToast(t('photoNotSaved'))
+  }
+
+  function acceptSharedEvent() {
+    setEvents((list) => [...list, incomingShare])
+    setIncomingShare(null)
+    setToast(t('shareAccepted'))
+  }
+
+  function discardSharedEvent() {
+    setIncomingShare(null)
   }
 
   function deleteEvent(id) {
@@ -241,6 +256,15 @@ export default function App() {
           }}
           onDelete={deleteEvent}
           onClose={() => setDetail(null)}
+          onToast={setToast}
+        />
+      )}
+
+      {incomingShare && (
+        <SharedEventPrompt
+          event={incomingShare}
+          onAccept={acceptSharedEvent}
+          onDiscard={discardSharedEvent}
         />
       )}
 

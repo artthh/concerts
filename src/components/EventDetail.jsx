@@ -14,6 +14,7 @@ import {
   relativeDays,
   t,
 } from '../lib/i18n.js'
+import { buildShareUrl } from '../lib/share.js'
 import { CloseIcon } from './Icons.jsx'
 import Modal from './Modal.jsx'
 import Stars from './Stars.jsx'
@@ -102,10 +103,32 @@ function DetailHero({ event, onClose }) {
   )
 }
 
-export default function EventDetail({ event, onEdit, onDelete, onClose }) {
+export default function EventDetail({ event, onEdit, onDelete, onClose, onToast }) {
   const hasExtras = KINDS_WITH_EXTRAS.has(event.kind)
   const repeats = (event.repeat || 'none') !== 'none'
   const nth = occurrenceNumber(event)
+
+  // Web Share hands off to whatever the person picks (Messages, WhatsApp,
+  // ...); where that is not available, the link is copied instead, since a
+  // link with nowhere to paste it is useless.
+  async function handleShare() {
+    const url = buildShareUrl(event)
+    const shareData = { title: event.title, text: t('shareMessage', { title: event.title, appName: t('appName') }), url }
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+        return
+      } catch (error) {
+        if (error?.name === 'AbortError') return
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      onToast(t('shareLinkCopied'))
+    } catch {
+      onToast(t('shareFailed'))
+    }
+  }
 
   return (
     <Modal title={event.title} onClose={onClose} closeLabel={t('close')} noHeader>
@@ -156,6 +179,9 @@ export default function EventDetail({ event, onEdit, onDelete, onClose }) {
       )}
 
       <div className="modal__actions">
+        <button type="button" className="button" onClick={handleShare}>
+          {t('share')}
+        </button>
         <button
           type="button"
           className="button button--danger"

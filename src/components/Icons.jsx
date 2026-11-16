@@ -65,3 +65,12 @@ export function CloseIcon(props) {
     </svg>
   )
 }
+
+export function ShareIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 15.5V4M12 4 7.5 8.5M12 4l4.5 4.5" />
+      <path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />
+    </svg>
+  )
+}

@@ -19,6 +19,16 @@ const STRINGS = {
   search: 'Search title, city, venue…',
   noResults: 'Nothing matches your search.',
 
+  share: 'Share',
+  shareMessage: '{title} — {appName}',
+  shareLinkCopied: 'Link copied',
+  shareFailed: 'Could not share this event',
+  sharedEventTitle: 'Shared event',
+  sharedEventHint: "This adds a copy to your own list. It won't stay in sync with theirs, and the photo isn't included yet.",
+  addSharedEvent: 'Add to my events',
+  shareAccepted: 'Added to your events',
+  discard: 'Discard',
+
   emptyUpcoming: 'Nothing on the calendar. Add the next one.',
   emptyHome: 'Nothing on the calendar. Add one from Events.',
   numbers: 'Numbers',
