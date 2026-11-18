@@ -3,6 +3,14 @@
 // Newest first. Add a new entry at the top the next time something ships.
 export const CHANGELOG = [
   {
+    version: 13,
+    date: '2026-11-18',
+    title: 'Side rail moved to the right',
+    items: [
+      "The wide-screen side rail (iPhone Duo, wide windows) now sits on the right edge, with its own controls pushed down to the bottom -- a real-device screenshot showed the Duo's own system overlay sitting over the top of that edge",
+    ],
+  },
+  {
     version: 12,
     date: '2026-11-16',
     title: 'Short share links with a real preview',

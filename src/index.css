@@ -124,7 +124,7 @@ textarea {
   flex-direction: column;
   max-width: var(--app-max);
   margin: 0 auto;
-  padding-left: var(--rail-w);
+  padding-right: var(--rail-w);
   background: var(--bg);
 }
 
@@ -291,22 +291,30 @@ html[data-nav='rail-wide'] .app__main {
   box-shadow: 0 10px 26px rgba(124, 58, 237, 0.45);
 }
 
-/* No bottom bar to float above once the rail is up. */
+/* No bottom bar to float above once the rail is up, and the rail now sits
+   on the right, so the fab moves to the left to stay clear of it. */
 html[data-nav='rail'] .fab,
 html[data-nav='rail-wide'] .fab {
   bottom: max(18px, var(--safe-bottom));
+  right: auto;
+  left: max(18px, calc((100vw - var(--app-max)) / 2 + 18px));
 }
 
 /* Side rail: the bottom bar's replacement once there is room down the edge
    instead of across the bottom -- the same translucent glass, just vertical
    and full height. It also carries settings and the profile photo, which
-   PageHeader stops rendering while this is up. */
+   PageHeader stops rendering while this is up.
+
+   It sits on the right, not the left: that's the edge a device like the
+   Duo paints its own system controls (clock, battery, now-playing) over,
+   so this is also the one place on screen that's actually clear for it --
+   left would just trade one collision for another. */
 
 .rail {
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 0;
+  right: 0;
   z-index: 30;
   width: var(--rail-w);
   display: flex;
@@ -314,7 +322,7 @@ html[data-nav='rail-wide'] .fab {
   align-items: center;
   gap: 16px;
   padding: calc(12px + var(--safe-top)) 10px calc(12px + var(--safe-bottom));
-  border-right: 1px solid var(--glass-border);
+  border-left: 1px solid var(--glass-border);
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
   backdrop-filter: blur(22px) saturate(180%);

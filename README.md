@@ -77,10 +77,14 @@ rather than on the next reload:
 
 - **Below 440px** (a phone, or a split-view pane): the bottom bar, unchanged.
 - **440px and up** (the inner display, and any wider browser window): the bar
-  becomes a narrow icon-only rail down the left edge. Settings and the
-  profile photo move to its foot, since `PageHeader` stops rendering them —
-  the rail already carries both, and rendering them twice is what this bit
-  the gym app's own version of this feature.
+  becomes a narrow icon-only rail down the right edge, its own controls
+  (logo, tabs, settings, profile photo) pushed to the bottom rather than
+  spread from the top -- a real-device screenshot showed the Duo painting
+  its own system overlay (now-playing, clock, signal) over the top portion
+  of that same edge, so nothing of ours should sit there either. Settings
+  and the profile photo move to the rail's foot, since `PageHeader` stops
+  rendering them — the rail already carries both, and rendering them twice
+  is what this bit the gym app's own version of this feature.
 - **860px and up** (the inner display in landscape, and any wider window):
   the rail widens and its tabs gain labels.
 

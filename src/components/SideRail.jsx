@@ -15,6 +15,11 @@ const SECTIONS = [
 export default function SideRail({ section, onSection, wide, profilePhoto, onSettings }) {
   return (
     <nav className={wide ? 'rail rail--wide' : 'rail'} aria-label={t('appName')}>
+      {/* Empty space goes up top, not between the tabs and the foot --
+          that's the edge a Duo (and similar) devices paint their own system
+          controls over, so nothing of ours should be sitting there. */}
+      <div className="rail__spacer" />
+
       <span className="icon-button rail__mark" aria-hidden="true">
         ⏳
       </span>
@@ -34,8 +39,6 @@ export default function SideRail({ section, onSection, wide, profilePhoto, onSet
           </button>
         ))}
       </div>
-
-      <div className="rail__spacer" />
 
       <div className="rail__foot">
         <button
