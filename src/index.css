@@ -321,7 +321,11 @@ html[data-nav='rail-wide'] .fab {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: calc(12px + var(--safe-top)) 10px calc(12px + var(--safe-bottom));
+  /* Right padding a bit past the left on purpose: the icon column centers
+     in the space between them, and a device's own system icons (battery,
+     wifi, ...) tend to sit a few px further in from the true screen edge
+     than that symmetric center lands, so this nudges ours to line up. */
+  padding: calc(12px + var(--safe-top)) 18px calc(12px + var(--safe-bottom)) 10px;
   border-left: 1px solid var(--glass-border);
   background: var(--glass-bg);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
