@@ -3,6 +3,15 @@
 // Newest first. Add a new entry at the top the next time something ships.
 export const CHANGELOG = [
   {
+    version: 14,
+    date: '2026-11-18',
+    title: 'Fewer stuck-on-an-old-version moments',
+    items: [
+      "The app's own page now always checks for a fresh copy instead of an installed home-screen icon sometimes holding onto an old one indefinitely",
+      "Nudged the side rail's icons further left to line up with the Duo's own system icons, measured directly off a real screenshot",
+    ],
+  },
+  {
     version: 13,
     date: '2026-11-18',
     title: 'Side rail moved to the right',

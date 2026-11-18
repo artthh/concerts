@@ -207,6 +207,15 @@ through to `index.html` the way a single-page app needs. None of this is
 required to run the app -- without it, the Share button still works, just
 back to the longer, self-contained link form it used before this existed.
 
+`vercel.json` also forces `index.html` to be fetched fresh every time
+(`Cache-Control: no-cache, must-revalidate`) rather than letting it sit in a
+cache indefinitely. The hashed `/assets/*.js` and `.css` files are still
+cached hard, which is fine -- a changed one gets a new hash, so there's
+nothing stale to serve -- but `index.html` is what points at that hash, and
+a device holding onto an old copy of it (an installed "Add to Home Screen"
+icon especially) would keep loading an old version of everything no matter
+how many times the actual code gets redeployed.
+
 ## Add it to your phone's home screen
 
 1. Open the deployed URL in Safari (iOS) or Chrome (Android).
